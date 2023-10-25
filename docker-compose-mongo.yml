@@ -1,0 +1,16 @@
+version: '3.2'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongodb/db/:/data/db/
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: huyhuyhuy
