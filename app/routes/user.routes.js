@@ -15,9 +15,15 @@ module.exports = function(app) {
   app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
 
   app.get(
-    "/api/test/mod",
-    [authJwt.verifyToken, authJwt.isModerator],
-    controller.moderatorBoard
+    "/api/test/farm",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.farmBoard
+  );
+
+  app.get(
+    "/api/test/client",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.clientBoard
   );
 
   app.get(

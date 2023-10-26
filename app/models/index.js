@@ -15,6 +15,6 @@ db.client = require("./client.model");
 db.user = require("./user.model");
 db.role = require("./role.model");
 
-db.ROLES = ["user", "admin", "moderator"];
+db.ROLES = ["farm", "admin", "client"];
 
 module.exports = db;

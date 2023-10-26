@@ -25,70 +25,84 @@ verifyToken = (req, res, next) => {
 };
 
 isAdmin = (req, res, next) => {
-  User.findById(req.userId).exec((err, user) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-
-    Role.find(
-      {
-        _id: { $in: user.roles }
-      },
-      (err, roles) => {
-        if (err) {
-          res.status(500).send({ message: err });
-          return;
-        }
-
-        for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "admin") {
-            next();
-            return;
-          }
-        }
-
-        res.status(403).send({ message: "Require Admin Role!" });
-        return;
+  User.findById(req.userId)
+    .exec()
+    .then(user => {
+      if (!user) {
+        return res.status(500).send({ message: "User Not found." });
       }
-    );
-  });
+
+      return Role.find({
+        _id: { $in: user.roles },
+        name: "admin"
+      }).exec();
+    })
+    .then(roles => {
+      if (roles.length > 0) {
+        next();
+      } else {
+        res.status(403).send({ message: "Require Admin Role!" });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({ message: err });
+    });
 };
 
-isModerator = (req, res, next) => {
-  User.findById(req.userId).exec((err, user) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-
-    Role.find(
-      {
-        _id: { $in: user.roles }
-      },
-      (err, roles) => {
-        if (err) {
-          res.status(500).send({ message: err });
-          return;
-        }
-
-        for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "moderator") {
-            next();
-            return;
-          }
-        }
-
-        res.status(403).send({ message: "Require Moderator Role!" });
-        return;
+isClient = (req, res, next) => {
+  User.findById(req.userId)
+    .exec()
+    .then(user => {
+      if (!user) {
+        return res.status(500).send({ message: "User Not found." });
       }
-    );
-  });
+
+      return Role.find({
+        _id: { $in: user.roles },
+        name: "client"
+      }).exec();
+    })
+    .then(roles => {
+      if (roles.length > 0) {
+        next();
+      } else {
+        res.status(403).send({ message: "Require Client Role!" });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({ message: err });
+    });
+};
+
+isFarm = (req, res, next) => {
+  User.findById(req.userId)
+    .exec()
+    .then(user => {
+      if (!user) {
+        return res.status(500).send({ message: "User Not found." });
+      }
+
+      return Role.find({
+        _id: { $in: user.roles },
+        name: "farm"
+      }).exec();
+    })
+    .then(roles => {
+      if (roles.length > 0) {
+        next();
+      } else {
+        res.status(403).send({ message: "Require Farm Role!" });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({ message: err });
+    });
 };
 
 const authJwt = {
   verifyToken,
   isAdmin,
-  isModerator
+  isClient,
+  isFarm
 };
 module.exports = authJwt;
