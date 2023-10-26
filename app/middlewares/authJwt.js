@@ -49,7 +49,7 @@ isAdmin = (req, res, next) => {
     });
 };
 
-isModerator = (req, res, next) => {
+isClient = (req, res, next) => {
   User.findById(req.userId)
     .exec()
     .then(user => {
@@ -59,14 +59,39 @@ isModerator = (req, res, next) => {
 
       return Role.find({
         _id: { $in: user.roles },
-        name: "moderator"
+        name: "client"
       }).exec();
     })
     .then(roles => {
       if (roles.length > 0) {
         next();
       } else {
-        res.status(403).send({ message: "Require Moderator Role!" });
+        res.status(403).send({ message: "Require Client Role!" });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({ message: err });
+    });
+};
+
+isFarm = (req, res, next) => {
+  User.findById(req.userId)
+    .exec()
+    .then(user => {
+      if (!user) {
+        return res.status(500).send({ message: "User Not found." });
+      }
+
+      return Role.find({
+        _id: { $in: user.roles },
+        name: "farm"
+      }).exec();
+    })
+    .then(roles => {
+      if (roles.length > 0) {
+        next();
+      } else {
+        res.status(403).send({ message: "Require Farm Role!" });
       }
     })
     .catch(err => {
@@ -77,6 +102,7 @@ isModerator = (req, res, next) => {
 const authJwt = {
   verifyToken,
   isAdmin,
-  isModerator
+  isClient,
+  isFarm
 };
 module.exports = authJwt;

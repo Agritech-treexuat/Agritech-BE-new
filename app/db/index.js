@@ -25,18 +25,18 @@ function initial() {
     .then(count => {
       if (count === 0) {
         const userRole = new Role({
-          name: "user"
+          name: "farm"
         });
 
-        const moderatorRole = new Role({
-          name: "moderator"
+        const clientRole = new Role({
+          name: "client"
         });
 
         const adminRole = new Role({
           name: "admin"
         });
 
-        return Promise.all([userRole.save(), moderatorRole.save(), adminRole.save()]);
+        return Promise.all([userRole.save(), clientRole.save(), adminRole.save()]);
       }
     })
     .then(savedRoles => {
