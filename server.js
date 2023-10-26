@@ -5,10 +5,10 @@ const dbConfig = require('./app/config/db.config')
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:8081"
+  origin: "*"
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 // parse requests of content-type - application/json
 app.use(express.json());
@@ -29,8 +29,6 @@ db.mongoose
   .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    socketTimeoutMS: 30000,
-    keepAlive: true,
     dbName: "Agritech",
     user: dbConfig.USERNAME,
     pass: dbConfig.PASSWORD
