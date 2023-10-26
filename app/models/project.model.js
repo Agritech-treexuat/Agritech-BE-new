@@ -3,12 +3,14 @@ const mongoose = require('mongoose');
 const projectSchema = new mongoose.Schema({
   id: String,
   contractID: String,
-  farm: String,
+  farmID: String,
   input: {
     tx: String,
+    initDate: Date,
     seed: String,
     amount: Number,
-    images: [String]
+    images: [String],
+    expect: String,
   },
   output: {
     tx: String,
