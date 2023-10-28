@@ -100,7 +100,6 @@ exports.getAllProjectsByFarmId = async (req, res) => {
   }
 };
 
-// Trong controller.js
 exports.getProjectById = async (req, res) => {
   try {
     const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
@@ -178,6 +177,29 @@ exports.getOutputs = async (req, res) => {
 
     // Trả về danh sách các quy trình trong ngày đã chỉ định hoặc toàn bộ danh sách nếu không có ngày tìm kiếm
     res.status(200).json({ outputs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.getInput = async (req, res) => {
+  try {
+    const projectId = req.params.projectId; // Get project id from the route parameter
+
+    // Use Mongoose to find the project by id
+    const project = await Project.findOne({ _id: projectId });
+
+    // Check if the project exists
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    // Get the input information from the project
+    const input = project.input;
+
+    // Return the input data
+    res.status(200).json({ input });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

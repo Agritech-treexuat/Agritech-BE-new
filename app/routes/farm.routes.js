@@ -34,7 +34,7 @@ module.exports = function(app) {
 
   app.get("/farm/project/:projectId/output", controller.getOutputs);
 
-
+  app.get("/farm/project/:projectId/input", controller.getInput);
 
 
 };
