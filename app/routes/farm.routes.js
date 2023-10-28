@@ -28,4 +28,7 @@ module.exports = function(app) {
 
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 
+  app.get("/farm/project/:projectId", controller.getProjectById);
+
+
 };
