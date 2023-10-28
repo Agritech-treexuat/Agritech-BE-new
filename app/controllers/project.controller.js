@@ -24,9 +24,9 @@ exports.initProject = async (req, res) => {
 
     // Tạo một project với thông tin từ yêu cầu
     const project = new Project({
-      farmID: farm.id,
+      farmID,
       contractID,
-      input,
+      input
     });
 
     // Lưu project vào cơ sở dữ liệu
@@ -37,4 +37,25 @@ exports.initProject = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
+};
+
+// Xu ly yeu cau them projct tu farm
+exports.addProcessToProject = async (req, res) => {
+  try {
+    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
+    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
+    const processData = req.body;
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(403).send({ message: "Farm does not have access to this project." });
+    }
+    // Thêm quy trình vào dự án
+    project.process.push(processData);
+    const updatedProject = await project.save();
+    return res.status(200).json({ message: 'Add process to project successfully', updatedProject: updatedProject});
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).send({ message: error });
+  };
 };

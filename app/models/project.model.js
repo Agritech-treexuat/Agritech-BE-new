@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+
+const process = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
+  tx: String,
+  type: String,
+  value: String,
+  time: Date
+});
+
 const projectSchema = new mongoose.Schema({
   id: String,
   contractID: String,
@@ -18,11 +27,7 @@ const projectSchema = new mongoose.Schema({
     amount_perOne: Number,
     images: [String]
   },
-  process: [{
-    tx: String,
-    type: String,
-    value: String,
-  }],
+  process: [process],
 });
 
 const Project = mongoose.model('Project', projectSchema);
