@@ -25,4 +25,7 @@ module.exports = function(app) {
     "/farm/project/addOutput/:projectId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addOutputToProject);
+
+  app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
+
 };

@@ -5,6 +5,7 @@ const Role = db.role;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
+const Farm = require("../models/farm.model");
 
 exports.signup = (req, res) => {
   const user = new User({
@@ -22,6 +23,11 @@ exports.signup = (req, res) => {
             return user.save();
           })
           .then(() => {
+            const farm = new Farm({
+              userid: user._id,
+              email: req.body.email,
+            });
+            farm.save()
             res.send({ message: "User was registered successfully!" });
           })
           .catch(err => {

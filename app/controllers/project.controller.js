@@ -79,3 +79,24 @@ exports.addOutputToProject = async (req, res) => {
     res.status(500).send({ message: error });
   };
 };
+
+// Trong controller.js
+exports.getAllProjectsByFarmId = async (req, res) => {
+  try {
+    const farmId = req.params.farmId; // Lấy farmId từ tham số của tuyến đường
+
+    // Sử dụng mongoose để tìm tất cả các dự án của trang trại dựa trên farmId
+    const projects = await Project.find({ farmID: farmId });
+
+    if (!projects) {
+      return res.status(404).json({ message: "No projects found for this farm." });
+    }
+
+    // Trả về danh sách các dự án
+    res.status(200).json({ projects });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
