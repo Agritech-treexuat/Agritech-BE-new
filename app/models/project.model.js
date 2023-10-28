@@ -20,6 +20,7 @@ const projectSchema = new mongoose.Schema({
   id: String,
   contractID: String,
   farmID: String,
+  name: String,
   input: {
     tx: String,
     initDate: Date,

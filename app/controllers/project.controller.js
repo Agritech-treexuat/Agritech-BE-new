@@ -12,7 +12,7 @@ exports.initProject = async (req, res) => {
   try {
     // Lấy dữ liệu từ yêu cầu
     const farmID = req.userId;
-    const { input } = req.body;
+    const { input, name } = req.body;
     const contractID = req.body.contractID || null;
 
     // Tìm farm dựa trên farmID
@@ -25,6 +25,7 @@ exports.initProject = async (req, res) => {
     // Tạo một project với thông tin từ yêu cầu
     const project = new Project({
       farmID,
+      name,
       contractID,
       input
     });
@@ -119,3 +120,27 @@ exports.getProjectById = async (req, res) => {
   }
 };
 
+exports.getProcessesByDate = async (req, res) => {
+  try {
+    const projectId = req.params.projectId; // Lấy projectId từ tham số
+    const searchDate = new Date(req.query.date); // Lấy ngày tìm kiếm từ tham số truy vấn
+    const nextDate = new Date(searchDate);
+    nextDate.setDate(searchDate.getDate() + 1); // Tạo ngày tiếp theo (ngày sau ngày tìm kiếm)
+
+    // Sử dụng Mongoose để tìm kiếm các quy trình trong khoảng thời gian của ngày đã chỉ định
+    const project = await Project.findOne({ _id: projectId }); // Lấy thông tin dự án
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    const processes = project.process.filter(process => {
+      return process.time >= searchDate && process.time < nextDate;
+    });
+
+    // Trả về danh sách các quy trình trong ngày đã chỉ định
+    res.status(200).json({ processes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

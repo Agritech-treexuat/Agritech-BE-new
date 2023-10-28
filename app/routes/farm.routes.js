@@ -30,5 +30,8 @@ module.exports = function(app) {
 
   app.get("/farm/project/:projectId", controller.getProjectById);
 
+  app.get("/farm/project/:projectId/process", controller.getProcessesByDate);
+
+
 
 };
