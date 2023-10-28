@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 
+const output = new mongoose.Schema({
+  _tx: String,
+  amount: Number,
+  amount_perOne: Number,
+  images: [String],
+  time: Date
+});
 
 const process = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
@@ -21,12 +28,7 @@ const projectSchema = new mongoose.Schema({
     images: [String],
     expect: String,
   },
-  output: {
-    tx: String,
-    amount: Number,
-    amount_perOne: Number,
-    images: [String]
-  },
+  output: [output],
   process: [process],
 });
 

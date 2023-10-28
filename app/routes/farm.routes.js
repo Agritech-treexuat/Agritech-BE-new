@@ -20,4 +20,9 @@ module.exports = function(app) {
     "/farm/project/addProcess/:projectId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addProcessToProject);
+
+  app.post(
+    "/farm/project/addOutput/:projectId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.addOutputToProject);
 };

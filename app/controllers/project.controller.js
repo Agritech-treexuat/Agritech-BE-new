@@ -59,3 +59,23 @@ exports.addProcessToProject = async (req, res) => {
     res.status(500).send({ message: error });
   };
 };
+
+exports.addOutputToProject = async (req, res) => {
+  try {
+    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
+    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
+    const outputData = req.body;
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(403).send({ message: "Farm does not have access to this project." });
+    }
+    // Thêm quy trình vào dự án
+    project.output = outputData;
+    const updatedProject = await project.save();
+    return res.status(200).json({ message: 'Add output to project successfully', updatedProject: updatedProject});
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).send({ message: error });
+  };
+};
