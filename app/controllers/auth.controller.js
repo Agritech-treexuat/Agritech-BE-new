@@ -9,7 +9,6 @@ const Farm = require("../models/farm.model");
 
 exports.signup = (req, res) => {
   const user = new User({
-    username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8)
   });
@@ -23,9 +22,10 @@ exports.signup = (req, res) => {
             return user.save();
           })
           .then(() => {
+            console.log("user: ", user)
             const farm = new Farm({
-              userid: user._id,
-              email: req.body.email,
+              farmID: user._id,
+              email: user.email,
             });
             farm.save()
             res.send({ message: "User was registered successfully!" });
@@ -40,6 +40,11 @@ exports.signup = (req, res) => {
             return user.save();
           })
           .then(() => {
+            const farm = new Farm({
+              farmID: user._id,
+              email: user.email,
+            });
+            farm.save()
             res.send({ message: "User was registered successfully!" });
           })
           .catch(err => {
@@ -55,12 +60,12 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   User.findOne({
-    username: req.body.username
+    email: req.body.email
   })
     .populate("roles", "-__v")
     .then(user => {
       if (!user) {
-        return res.status(404).send({ message: "User Not found." });
+        return res.status(404).send({ message: "Email Not found." });
       }
 
       var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
@@ -84,7 +89,6 @@ exports.signin = (req, res) => {
 
       res.status(200).send({
         id: user._id,
-        username: user.username,
         email: user.email,
         roles: authorities,
         accessToken: token
