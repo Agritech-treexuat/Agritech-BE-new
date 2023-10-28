@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const farmSchema = new mongoose.Schema({
   id: String,
+  farmID: String,
+  email: String,
   name: String,
   description: String,
   map: Object,
