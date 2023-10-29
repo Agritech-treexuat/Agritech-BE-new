@@ -9,10 +9,16 @@ const output = new mongoose.Schema({
 });
 
 const process = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
   tx: String,
   type: String,
   value: String,
+  time: Date
+});
+
+const expect = new mongoose.Schema({
+  tx: String,
+  amount: String,
+  note: String,
   time: Date
 });
 
@@ -31,6 +37,7 @@ const projectSchema = new mongoose.Schema({
   },
   output: [output],
   process: [process],
+  expect: [expect]
 });
 
 const Project = mongoose.model('Project', projectSchema);
