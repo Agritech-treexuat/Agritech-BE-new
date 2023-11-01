@@ -43,5 +43,7 @@ module.exports = function(app) {
 
   app.get("/farm/project/:projectId/input", controller.getInput);
 
+  app.get("/farm/me", [authJwt.verifyToken], controller.getMyProfile);
+
 
 };
