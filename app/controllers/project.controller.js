@@ -97,6 +97,26 @@ exports.addProcessToProject = async (req, res) => {
   };
 };
 
+exports.addImageToProject = async (req, res) => {
+  try {
+    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
+    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
+    const imageData = req.body;
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(403).send({ message: "Farm does not have access to this project." });
+    }
+    // Thêm quy trình vào dự án
+    project.image.push(imageData);
+    const updatedProject = await project.save();
+    return res.status(200).json({ message: 'Add image to project successfully', updatedProject: updatedProject});
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).send({ message: error });
+  };
+};
+
 exports.addOutputToProject = async (req, res) => {
   try {
     const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
@@ -207,6 +227,38 @@ exports.getProcesses = async (req, res) => {
   }
 };
 
+exports.getImages = async (req, res) => {
+  try {
+    const projectId = req.params.projectId; // Lấy projectId từ tham số
+    const searchDate = req.query.date ? new Date(req.query.date) : null; // Lấy ngày tìm kiếm từ tham số truy vấn hoặc để null nếu không có tham số
+    const nextDate = searchDate ? new Date(searchDate) : null;
+
+    if (searchDate) {
+      nextDate.setDate(searchDate.getDate() + 1); // Tạo ngày tiếp theo (ngày sau ngày tìm kiếm)
+    }
+
+    // Sử dụng Mongoose để tìm kiếm các quy trình trong khoảng thời gian của ngày đã chỉ định
+    const project = await Project.findOne({ _id: projectId }); // Lấy thông tin dự án
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    let images = project.image;
+
+    if (searchDate) {
+      images = project.image.filter(image => {
+        return image.time >= searchDate && image.time < nextDate;
+      });
+    }
+
+    // Trả về danh sách các quy trình trong ngày đã chỉ định hoặc toàn bộ danh sách nếu không có ngày tìm kiếm
+    res.status(200).json({ images });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 exports.getOutputs = async (req, res) => {
   try {
     const projectId = req.params.projectId; // Lấy projectId từ tham số
@@ -288,6 +340,31 @@ exports.getInput = async (req, res) => {
 
     // Return the input data
     res.status(200).json({ input });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.getProjectsByFarmId = async (req, res) => {
+  try {
+    const farmId = req.params.farmId; // Lấy farmId từ tham số đường dẫn
+
+    // Sử dụng Mongoose để tìm tất cả các dự án của trang trại dựa trên farmId
+    const projects = await Project.find({ farmID: farmId });
+
+    // Chuyển đổi dữ liệu thành định dạng bạn cần
+    const projectInfo = projects.map(project => {
+      return {
+        id: project._id,
+        name: project.name,
+        seed: project.input.seed,
+        initDate: project.input.initDate,
+        image: project.input.images[0], // Lấy hình ảnh đầu tiên trong mảng images
+      };
+    });
+
+    res.status(200).json(projectInfo);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

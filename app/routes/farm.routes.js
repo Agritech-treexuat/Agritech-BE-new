@@ -22,6 +22,11 @@ module.exports = function(app) {
     controller.addProcessToProject);
 
   app.post(
+    "/farm/project/addImage/:projectId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.addImageToProject);
+
+  app.post(
     "/farm/project/addOutput/:projectId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addOutputToProject);
@@ -31,17 +36,22 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addExpectToProject);
 
+    // Lay tat ca moi thu
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 
   app.get("/farm/project/:projectId", controller.getProjectById);
 
   app.get("/farm/project/:projectId/process", controller.getProcesses);
 
+  app.get("/farm/project/:projectId/image", controller.getImages);
+
   app.get("/farm/project/:projectId/output", controller.getOutputs);
 
   app.get("/farm/project/:projectId/expect", controller.getExpects);
 
   app.get("/farm/project/:projectId/input", controller.getInput);
+
+  app.get('/farm/:farmId/projects', controller.getProjectsByFarmId);
 
   app.get("/farm/me", [authJwt.verifyToken], controller.getMyProfile);
 

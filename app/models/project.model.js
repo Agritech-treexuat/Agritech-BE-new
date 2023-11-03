@@ -22,6 +22,13 @@ const expect = new mongoose.Schema({
   time: Date
 });
 
+const image = new mongoose.Schema({
+  tx: String,
+  hash: String,
+  imageUrl: String,
+  time: Date
+})
+
 const projectSchema = new mongoose.Schema({
   id: String,
   contractID: String,
@@ -37,7 +44,8 @@ const projectSchema = new mongoose.Schema({
   },
   output: [output],
   process: [process],
-  expect: [expect]
+  expect: [expect],
+  image: [image]
 });
 
 const Project = mongoose.model('Project', projectSchema);
