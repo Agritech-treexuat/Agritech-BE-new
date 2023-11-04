@@ -370,3 +370,193 @@ exports.getProjectsByFarmId = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.editProcess = async (req, res) => {
+  try {
+    const farmID = req.userId;
+    const projectId = req.params.projectId;
+    const processId = req.params.processId;
+    const newProcessData = req.body;
+
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    const process = project.process.id(processId);
+    if (!process) {
+      return res.status(404).json({ message: "Process not found." });
+    }
+
+    // Tạo một bản sao của quy trình trước khi chỉnh sửa
+    const previousProcessData = { ...process.toObject() };
+    delete previousProcessData._id; // Xóa trường _id
+
+    // Cập nhật quy trình với dữ liệu mới
+    for (const key in newProcessData) {
+      if (newProcessData.hasOwnProperty(key) && key !== 'historyProcess' && key != 'isEdited') {
+        process[key] = newProcessData[key];
+      }
+    }
+
+    // Xóa các trường không còn tồn tại trong dữ liệu mới
+    for (const key in previousProcessData) {
+      if (!newProcessData.hasOwnProperty(key) && key !== 'historyProcess' && key !== '_id' && key != 'isEdited') {
+        delete process[key];
+      }
+    }
+
+    // Đánh dấu quy trình đã được chỉnh sửa
+    process.isEdited = true;
+
+    // Lưu lịch sử chỉnh sửa
+    process.historyProcess.push({
+      ...previousProcessData,
+      modified_at: new Date(),
+    });
+
+    // Lưu lại dự án với thông tin cập nhật
+    await project.save();
+
+    res.status(200).json({ message: "Process updated successfully", updatedProcess: process });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.editOutput = async (req, res) => {
+  try {
+    const farmID = req.userId;
+    const projectId = req.params.projectId;
+    const outputId = req.params.outputId;
+    const newOutputData = req.body;
+
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    const output = project.output.id(outputId);
+    if (!output) {
+      return res.status(404).json({ message: "Process not found." });
+    }
+
+    // Tạo một bản sao của quy trình trước khi chỉnh sửa
+    const previousOutputData = { ...output.toObject() };
+    delete previousOutputData._id; // Xóa trường _id
+
+    // Cập nhật quy trình với dữ liệu mới
+    for (const key in newOutputData) {
+      if (newOutputData.hasOwnProperty(key) && key != 'historyOutput' && key != 'isEdited') {
+        output[key] = newOutputData[key];
+      }
+    }
+
+    // Đánh dấu quy trình đã được chỉnh sửa
+    output.isEdited = true;
+
+    // Lưu lịch sử chỉnh sửa
+    output.historyOutput.push({
+      ...previousOutputData,
+      modified_at: new Date(),
+    });
+
+    // Lưu lại dự án với thông tin cập nhật
+    await project.save();
+
+    res.status(200).json({ message: "Output updated successfully", updatedOutput: output });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.editExpect = async (req, res) => {
+  try {
+    const farmID = req.userId;
+    const projectId = req.params.projectId;
+    const expectId = req.params.expectId;
+    const newExpectData = req.body;
+
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    const expect = project.expect.id(expectId);
+    if (!expect) {
+      return res.status(404).json({ message: "Process not found." });
+    }
+
+    // Tạo một bản sao của quy trình trước khi chỉnh sửa
+    const previousExpectData = { ...expect.toObject() };
+    delete previousExpectData._id; // Xóa trường _id
+
+    // Cập nhật quy trình với dữ liệu mới
+    for (const key in newExpectData) {
+      if (newExpectData.hasOwnProperty(key) && key != 'historyExpect' && key != 'isEdited') {
+        expect[key] = newExpectData[key];
+      }
+    }
+
+    // Đánh dấu quy trình đã được chỉnh sửa
+    expect.isEdited = true;
+
+    // Lưu lịch sử chỉnh sửa
+    expect.historyExpect.push({
+      ...previousExpectData,
+      modified_at: new Date(),
+    });
+
+    // Lưu lại dự án với thông tin cập nhật
+    await project.save();
+
+    res.status(200).json({ message: "Expect updated successfully", updatedExpect: expect });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.editInput = async (req, res) => {
+  try {
+    const farmID = req.userId;
+    const projectId = req.params.projectId;
+    const newInputData = req.body;
+
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    const input = project.input
+
+    // Tạo một bản sao của quy trình trước khi chỉnh sửa
+    const previousInputData = { ...input };
+
+    // Cập nhật quy trình với dữ liệu mới
+    for (const key in newInputData) {
+      if (newInputData.hasOwnProperty(key) && key != 'historyInput' && key != 'isEdited') {
+        input[key] = newInputData[key];
+      }
+    }
+
+    // Đánh dấu quy trình đã được chỉnh sửa
+    input.isEdited = true;
+
+    // Lưu lịch sử chỉnh sửa
+    input.historyInput.push({
+      ...previousInputData,
+      modified_at: new Date(),
+    });
+
+    // Lưu lại dự án với thông tin cập nhật
+    await project.save();
+
+    res.status(200).json({ message: "Input updated successfully", updatedInput: input });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

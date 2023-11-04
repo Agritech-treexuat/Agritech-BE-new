@@ -36,6 +36,25 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addExpectToProject);
 
+  app.post(
+    "/farm/project/editProcess/:projectId/:processId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.editProcess);
+
+  app.post(
+    "/farm/project/editOutput/:projectId/:outputId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.editOutput);
+
+  app.post(
+    "/farm/project/editExpect/:projectId/:expectId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.editExpect);
+
+  app.post(
+    "/farm/project/editInput/:projectId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.editInput);
     // Lay tat ca moi thu
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 
