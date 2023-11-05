@@ -5,6 +5,7 @@ const {mongoose} = require('mongoose')
 
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
+const QR = require('../models/qr.model');
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
@@ -439,7 +440,7 @@ exports.editOutput = async (req, res) => {
 
     const output = project.output.id(outputId);
     if (!output) {
-      return res.status(404).json({ message: "Process not found." });
+      return res.status(404).json({ message: "Output not found." });
     }
 
     // Tạo một bản sao của quy trình trước khi chỉnh sửa
@@ -558,5 +559,71 @@ exports.editInput = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.exportQR = async (req, res) => {
+  try {
+
+    // Tìm output dựa trên outputId
+    const farmID = req.userId;
+    const projectId = req.params.projectId;
+    const outputId = req.params.outputId;
+
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    const output = project.output.id(outputId);
+    if (!output) {
+      return res.status(404).json({ message: "Output not found." });
+    }
+
+    const { amount, amount_perOne, npp } = output;
+
+    // Tính số lượng sản phẩm
+    const a = Math.floor(amount / amount_perOne);
+
+    // Lưu trữ danh sách QR codes
+    const qrCodes = [];
+
+    // Tạo QR codes cho từng NPP
+    if (npp && npp.length > 0) {
+      npp.forEach((nppItem) => {
+        if (nppItem.name) {
+          const nppQty = nppItem.amount;
+          for (let i = 0; i < nppQty; i++) {
+            qrCodes.push({
+              isScanned: false,
+              time: new Date(),
+              outputId,
+              npp: nppItem.name,
+              txScan: '',
+            });
+          }
+        }
+      });
+    }
+
+    // Tạo QR codes cho trường hợp khác
+    const otherQty = a - qrCodes.length;
+    for (let i = 0; i < otherQty; i++) {
+      qrCodes.push({
+        isScanned: false,
+        time: new Date(),
+        outputId,
+        npp: 'other',
+        txScan: '',
+      });
+    }
+
+    // Lưu các QR codes vào cơ sở dữ liệu
+    const savedQRs = await QR.insertMany(qrCodes);
+
+    res.status(200).json({ message: 'QR codes exported successfully', qrCodes: savedQRs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

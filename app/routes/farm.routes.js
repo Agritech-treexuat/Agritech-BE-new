@@ -55,6 +55,11 @@ module.exports = function(app) {
     "/farm/project/editInput/:projectId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.editInput);
+
+  app.post(
+    "/farm/project/exportQR/:projectId/:outputId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.exportQR);
     // Lay tat ca moi thu
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 
