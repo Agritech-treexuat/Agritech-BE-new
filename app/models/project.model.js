@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 
+const npp = new mongoose.Schema({
+  name: String,
+  amount: Number
+})
+
 const historyOutput = new mongoose.Schema({
   tx: String,
   amount: Number,
   amount_perOne: Number,
   images: [String],
   time: Date,
-  modified_at: Date
+  modified_at: Date,
+  npp: [npp],
 })
 
 const historyProcess = new mongoose.Schema({
@@ -46,6 +52,8 @@ const output = new mongoose.Schema({
   time: Date,
   isEdited: Boolean,
   historyOutput: [historyOutput],
+  npp: [npp],
+  exportQR: Boolean
 });
 
 const process = new mongoose.Schema({
