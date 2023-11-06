@@ -6,7 +6,8 @@ const qrSchema = new mongoose.Schema({
   timeScanned: Date,
   outputId: String,
   npp: String,
-  txScan: String
+  txScan: String,
+  clientId: String
 });
 
 const QR = mongoose.model('QR', qrSchema);

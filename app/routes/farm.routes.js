@@ -60,6 +60,11 @@ module.exports = function(app) {
     "/farm/project/exportQR/:projectId/:outputId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.exportQR);
+
+  app.post(
+    "/scanQR/:id/:clientId",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.scanQR);
     // Lay tat ca moi thu
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 

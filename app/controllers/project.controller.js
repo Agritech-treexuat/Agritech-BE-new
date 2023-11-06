@@ -90,7 +90,7 @@ exports.addProcessToProject = async (req, res) => {
     // Thêm quy trình vào dự án
     project.process.push(processData);
     const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add process to project successfully', updatedProject: updatedProject});
+    return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process});
   }
   catch(error) {
     console.error(error);
@@ -130,7 +130,7 @@ exports.addOutputToProject = async (req, res) => {
     // Thêm quy trình vào dự án
     project.output.push(outputData);
     const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add output to project successfully', updatedProject: updatedProject});
+    return res.status(200).json({ message: 'Add output to project successfully', updatedProjectOutput: updatedProject.output});
   }
   catch(error) {
     console.error(error);
@@ -150,7 +150,7 @@ exports.addExpectToProject = async (req, res) => {
     // Thêm quy trình vào dự án
     project.expect.push(expectData);
     const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add expect to project successfully', updatedProject: updatedProject});
+    return res.status(200).json({ message: 'Add expect to project successfully', updatedProjectExpect: updatedProject.expect});
   }
   catch(error) {
     console.error(error);
@@ -419,7 +419,7 @@ exports.editProcess = async (req, res) => {
     // Lưu lại dự án với thông tin cập nhật
     await project.save();
 
-    res.status(200).json({ message: "Process updated successfully", updatedProcess: process });
+    res.status(200).json({ message: "Process updated successfully", updatedProcess: project.process });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -466,7 +466,7 @@ exports.editOutput = async (req, res) => {
     // Lưu lại dự án với thông tin cập nhật
     await project.save();
 
-    res.status(200).json({ message: "Output updated successfully", updatedOutput: output });
+    res.status(200).json({ message: "Output updated successfully", updatedOutput: project.output });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -513,7 +513,7 @@ exports.editExpect = async (req, res) => {
     // Lưu lại dự án với thông tin cập nhật
     await project.save();
 
-    res.status(200).json({ message: "Expect updated successfully", updatedExpect: expect });
+    res.status(200).json({ message: "Expect updated successfully", updatedExpect: project.expect });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -621,9 +621,40 @@ exports.exportQR = async (req, res) => {
     // Lưu các QR codes vào cơ sở dữ liệu
     const savedQRs = await QR.insertMany(qrCodes);
 
-    res.status(200).json({ message: 'QR codes exported successfully', qrCodes: savedQRs });
+    // Cập nhật trường exportQR của output thành true
+    output.exportQR = true;
+    await project.save();
+
+    res.status(200).json({ message: 'QR codes exported successfully', qrCodes: savedQRs, projectOutput: project.output });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.scanQR = async (req, res) => {
+  try {
+    const qrId = req.params.id;
+    const clientId = req.params.clientId
+
+    // Tìm QR code dựa trên qrId
+    const qrCode = await QR.findById(qrId);
+
+    if (!qrCode) {
+      return res.status(404).json({ message: 'QR code not found' });
+    }
+
+    // Cập nhật trường isScanned thành true và gán thời gian quét
+    qrCode.isScanned = true;
+    qrCode.timeScanned = new Date();
+    qrCode.clientId = clientId
+
+    // Lưu lại QR code cập nhật vào cơ sở dữ liệu
+    const updatedQR = await qrCode.save();
+
+    res.status(200).json({ message: 'QR code scanned successfully', scannedQR: updatedQR });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
