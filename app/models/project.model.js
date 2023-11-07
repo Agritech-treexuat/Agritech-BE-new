@@ -91,6 +91,13 @@ const weather = new mongoose.Schema({
   speed: Number
 })
 
+const plan = new mongoose.Schema({
+  cultivativeId: String,
+  amount_per_kg: Number,
+  time: String,
+  note: String
+})
+
 const projectSchema = new mongoose.Schema({
   id: String,
   contractID: String,
@@ -111,7 +118,8 @@ const projectSchema = new mongoose.Schema({
   process: [process],
   expect: [expect],
   image: [image],
-  weather: [weather]
+  weather: [weather],
+  plan: [plan]
 });
 
 const Project = mongoose.model('Project', projectSchema);

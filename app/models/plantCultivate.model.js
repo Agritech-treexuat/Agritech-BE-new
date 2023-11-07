@@ -1,22 +1,17 @@
 const mongoose = require('mongoose');
 
+const plan = new mongoose.Schema({
+  cultivativeId: String,
+  amount_per_kg: Number,
+  time: String,
+  note: String
+})
+
 const plantCultivateSchema = new mongoose.Schema({
   farmId: String,
-  plan: [{
-    name: String,
-    price: Number,
-    seed: String,
-    phan_bon: [{
-      name: String,
-      amount_per_kg: Number,
-      description: String,
-    }],
-    thuoc_BVTV: [{
-      name: String,
-      amount_per_kg: Number,
-      description: String,
-    }],
-  }],
+  seedId: String,
+  price: Number,
+  plan: [plan],
 });
 
 const PlantCultivate = mongoose.model('PlantCultivate', plantCultivateSchema);
