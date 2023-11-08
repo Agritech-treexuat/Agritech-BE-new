@@ -658,3 +658,25 @@ exports.scanQR = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+exports.addPlantCultivate = async (req, res) => {
+  try {
+    const farmId = req.userId;
+    const {seedId, price, plan } = req.body;
+
+    if (!seedId || !plan) {
+      return res.status(400).json({ message: 'Thông tin bị thiếu' });
+    }
+
+    // Tạo một PlantCultivate mới
+    const newPlantCultivate = new PlantCultivate({ farmId, seedId, price, plan });
+
+    // Lưu PlantCultivate vào cơ sở dữ liệu
+    const savedPlantCultivate = await newPlantCultivate.save();
+
+    res.status(201).json({ message: 'PlantCultivate đã được thêm', plantCultivate: savedPlantCultivate });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+  }
+};

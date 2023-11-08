@@ -65,6 +65,11 @@ module.exports = function(app) {
     "/scanQR/:id/:clientId",
     [authJwt.verifyToken, authJwt.isClient],
     controller.scanQR);
+
+  app.post(
+    "/farm/plantCultivates",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.addPlantCultivate);
     // Lay tat ca moi thu
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 
