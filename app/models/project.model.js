@@ -120,6 +120,7 @@ const projectSchema = new mongoose.Schema({
   image: [image],
   weather: [weather],
   plan: [plan]
+
 });
 
 const Project = mongoose.model('Project', projectSchema);
