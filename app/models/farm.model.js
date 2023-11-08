@@ -11,6 +11,7 @@ const farmSchema = new mongoose.Schema({
   images: [String],
   square: Number,
   password: String, // Thêm trường password
+  plant: [String]
 });
 
 const Farm = mongoose.model('Farm', farmSchema);

@@ -119,10 +119,8 @@ const projectSchema = new mongoose.Schema({
   expect: [expect],
   image: [image],
   weather: [weather],
-  plantCultivate: {
-    price: Number,
-    plan: [plan]
-  }
+  plan: [plan]
+
 });
 
 const Project = mongoose.model('Project', projectSchema);
