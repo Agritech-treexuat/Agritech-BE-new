@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 
+const cultivativeItem = new mongoose.Schema({
+  name: String,
+  amount_per_ha: Number,
+});
+
+const plan = new mongoose.Schema({
+  cultivativeItems: [cultivativeItem],
+  time: String,
+  note: String
+})
+
 const npp = new mongoose.Schema({
   name: String,
   amount: Number
@@ -59,8 +70,9 @@ const output = new mongoose.Schema({
 const process = new mongoose.Schema({
   tx: String,
   type: String,
-  note: String,
+  cultivativeItems: [cultivativeItem],
   time: Date,
+  note: String,
   isEdited: Boolean,
   historyProcess: [historyProcess]
 });
@@ -87,17 +99,6 @@ const weather = new mongoose.Schema({
   temp: Number,
   humidity: Number,
   speed: Number
-})
-
-const cultivativeItem = new mongoose.Schema({
-  name: String,
-  amount_per_ha: Number,
-});
-
-const plan = new mongoose.Schema({
-  cultivativeItems: [cultivativeItem],
-  time: String,
-  note: String
 })
 
 const projectSchema = new mongoose.Schema({
