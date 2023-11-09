@@ -7,6 +7,7 @@ const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
 const PlantCultivate = require('../models/plantCultivate.model')
+const Plant = require('../models/plant.model')
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
@@ -659,6 +660,66 @@ exports.scanQR = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+// API để thêm cây
+exports.addPlant = async (req, res) => {
+  try {
+    const farmID = req.userId;
+    const { plantId } = req.body;
+
+    if (!plantId) {
+      return res.status(400).json({ message: 'Tên cây là bắt buộc' });
+    }
+    console.log("farm id: ", farmID)
+
+    const farm = await Farm.findOne({ farmID });
+    if(!farm) {
+      return res.status(400).json({ message: 'Khong co farm' });
+    }
+
+    console.log("farm: ", farm)
+
+    // Kiểm tra xem cây với tên đã tồn tại trong cơ sở dữ liệu chưa
+    const existingPlant = await farm.plant.includes(plantId);
+
+    if (existingPlant) {
+      return res.status(400).json({ message: 'Cây với tên này đã tồn tại' });
+    }
+
+    // Thêm cây vào mảng plant của farm
+    farm.plant.push(plantId);
+
+    // Lưu farm đã được cập nhật vào cơ sở dữ liệu
+    await farm.save();
+
+    res.status(200).json({ message: 'Cây đã được thêm vào farm', farm });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+  }
+};
+
+// API để lấy danh sách cây
+exports.getPlantsFarm = async (req, res) => {
+  try {
+    const { farmId } = req.params;
+
+    // Tìm farm dựa trên farmId
+    const farm = await Farm.findById(farmId);
+
+    if (!farm) {
+      return res.status(404).json({ message: 'Farm not found' });
+    }
+
+    // Lấy thông tin id, name, image của các plant
+    const plants = await Plant.find({ _id: { $in: farm.plant } }, 'id name image');
+
+    res.status(200).json({ plants });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+  }
+};
 
 exports.addPlantCultivate = async (req, res) => {
   try {

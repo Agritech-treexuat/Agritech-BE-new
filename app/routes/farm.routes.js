@@ -76,6 +76,11 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isFarm],
     controller.updatePlantCultivate);
 
+  app.post(
+    "/farm/plant",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.addPlant);
+
   app.post("/farm/addPlantCultivate/:projectId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addPlantCultivateToProject);
@@ -108,6 +113,9 @@ module.exports = function(app) {
   app.get("/farm/project/:projectId/input", controller.getInput);
 
   app.get('/farm/:farmId/projects', controller.getProjectsByFarmId);
+
+  app.get("/farm/plant/:farmId",
+    controller.getPlantsFarm);
 
   app.get("/farm/me", [authJwt.verifyToken], controller.getMyProfile);
 
