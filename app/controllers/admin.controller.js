@@ -243,14 +243,14 @@ exports.getCultivativeById = async (req, res) => {
 exports.addPlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const {seedId, price, plan } = req.body;
+    const {seed, plantId, price, plan } = req.body;
 
-    if (!seedId || !plan) {
+    if (!seed || !plan || !plantId) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
     // Tạo một PlantCultivate mới
-    const newPlantCultivate = new PlantCultivate({ farmId, seedId, price, plan });
+    const newPlantCultivate = new PlantCultivate({ farmId, seed, price, plan, plantId });
 
     // Lưu PlantCultivate vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();

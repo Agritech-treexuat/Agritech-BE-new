@@ -6,6 +6,7 @@ const {mongoose} = require('mongoose')
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
+const PlantCultivate = require('../models/plantCultivate.model')
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
@@ -662,14 +663,14 @@ exports.scanQR = async (req, res) => {
 exports.addPlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const {seedId, price, plan } = req.body;
+    const {seed, plantId, price, plan } = req.body;
 
-    if (!seedId || !plan) {
+    if (!seed || !plan) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
     // Tạo một PlantCultivate mới
-    const newPlantCultivate = new PlantCultivate({ farmId, seedId, price, plan });
+    const newPlantCultivate = new PlantCultivate({ farmId, seed, price, plan, plantId });
 
     // Lưu PlantCultivate vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();
@@ -678,5 +679,136 @@ exports.addPlantCultivate = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+  }
+};
+
+// API endpoint để cập nhật thông tin của một PlantCultivate
+exports.updatePlantCultivate = async (req, res) => {
+  try {
+    const farmId = req.userId;
+    const { plantCultivateId, seed, price, plan } = req.body;
+
+    if (!plantCultivateId || !seed || !plan) {
+      return res.status(400).json({ message: 'Thông tin bị thiếu' });
+    }
+
+    // Kiểm tra xem PlantCultivate có tồn tại không
+    const existingPlantCultivate = await PlantCultivate.findOne({ _id: plantCultivateId, farmId });
+
+    if (!existingPlantCultivate) {
+      return res.status(404).json({ message: 'PlantCultivate không tồn tại hoặc không thuộc sở hữu của bạn' });
+    }
+
+    // Cập nhật thông tin của PlantCultivate
+    existingPlantCultivate.seed = seed;
+    existingPlantCultivate.price = price;
+    existingPlantCultivate.plan = plan;
+
+    // Lưu PlantCultivate đã cập nhật vào cơ sở dữ liệu
+    const updatedPlantCultivate = await existingPlantCultivate.save();
+
+    res.status(200).json({ message: 'PlantCultivate đã được cập nhật', plantCultivate: updatedPlantCultivate });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+  }
+};
+
+exports.addPlantCultivateToProject = async (req, res) => {
+  try {
+    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
+    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
+    const data = req.body;
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(403).send({ message: "Farm does not have access to this project." });
+    }
+    // Thêm quy trình vào dự án
+    project.plan = data.plan;
+    const updatedProject = await project.save();
+    return res.status(200).json({ message: 'Add plan to project successfully', updatedProjectPlan: updatedProject.plan});
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).send({ message: error });
+  };
+};
+
+exports.updatePlantCultivateToProject = async (req, res) => {
+  try {
+    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
+    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
+    const data = req.body;
+    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
+    if (!project) {
+      return res.status(403).send({ message: "Farm does not have access to this project." });
+    }
+    // Thêm quy trình vào dự án
+    project.plan = data.plan;
+    const updatedProject = await project.save();
+    return res.status(200).json({ message: 'Update plan to project successfully', updatedProjectPlan: updatedProject.plan});
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).send({ message: error });
+  };
+};
+
+exports.getPlanFromProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    // Tìm dự án dựa trên projectId
+    const project = await Project.findOne({ _id: projectId });
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Trả về thông tin kế hoạch của dự án
+    res.status(200).json({ plan: project.plan });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// API endpoint để lấy thông tin kế hoạch từ plantId
+exports.getPlanInFarmFromPlantId = async (req, res) => {
+  try {
+    const { farmId, plantId } = req.params;
+
+    // Tìm tất cả các plantCultivates dựa trên farmId và plantId
+    const plantCultivates = await PlantCultivate.find({ farmId, plantId });
+
+    if (!plantCultivates || plantCultivates.length === 0) {
+      return res.status(404).json({ message: 'PlantCultivates not found' });
+    }
+
+    // Lấy tất cả các kế hoạch của các plantCultivates
+    const plans = plantCultivates.map((plantCultivate) => plantCultivate.plan);
+
+    res.status(200).json({ plans });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// API endpoint để lấy thông tin kế hoạch từ seed
+exports.getPlanInFarmFromSeed = async (req, res) => {
+  try {
+    const { seed, farmId } = req.params;
+
+    // Tìm thông tin cây trồng dựa trên seed
+    const plantCultivate = await PlantCultivate.findOne({ seed, farmId });
+
+    if (!plantCultivate) {
+      return res.status(404).json({ message: 'Plant not found' });
+    }
+
+    // Trả về thông tin kế hoạch của cây trồng
+    res.status(200).json({ plan: plantCultivate.plan });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
