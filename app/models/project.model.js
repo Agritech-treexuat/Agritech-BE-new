@@ -29,8 +29,7 @@ const historyOutput = new mongoose.Schema({
 const historyProcess = new mongoose.Schema({
   tx: String,
   type: String,
-  name: String,
-  amount: Number,
+  cultivativeItems: [cultivativeItem],
   note: String,
   time: Date,
   modified_at: Date
