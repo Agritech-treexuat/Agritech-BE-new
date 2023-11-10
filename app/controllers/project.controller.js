@@ -703,9 +703,8 @@ exports.addPlant = async (req, res) => {
 exports.getPlantsFarm = async (req, res) => {
   try {
     const { farmId } = req.params;
-
     // Tìm farm dựa trên farmId
-    const farm = await Farm.findById(farmId);
+    const farm = await Farm.findOne({farmID: farmId});
 
     if (!farm) {
       return res.status(404).json({ message: 'Farm not found' });

@@ -83,7 +83,7 @@ exports.initProject = async (req, res) => {
 // API để thêm cây
 exports.addPlant = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, image } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: 'Tên cây là bắt buộc' });
@@ -97,7 +97,7 @@ exports.addPlant = async (req, res) => {
     }
 
     // Tạo một cây mới
-    const newPlant = new Plant({ name });
+    const newPlant = new Plant({ name, image });
 
     // Lưu cây vào cơ sở dữ liệu
     const savedPlant = await newPlant.save();
