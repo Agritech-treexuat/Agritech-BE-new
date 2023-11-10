@@ -683,7 +683,7 @@ exports.addPlant = async (req, res) => {
     const existingPlant = await farm.plant.includes(plantId);
 
     if (existingPlant) {
-      return res.status(400).json({ message: 'Cây với tên này đã tồn tại' });
+      return res.status(400).json({ message: 'EXISTED_TREE' });
     }
 
     // Thêm cây vào mảng plant của farm
@@ -692,7 +692,9 @@ exports.addPlant = async (req, res) => {
     // Lưu farm đã được cập nhật vào cơ sở dữ liệu
     await farm.save();
 
-    res.status(200).json({ message: 'Cây đã được thêm vào farm', farm });
+    const plants = await Plant.find({ _id: { $in: farm.plant } }, 'id name image');
+
+    res.status(200).json({ message: 'Cây đã được thêm vào farm', plants: plants });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
