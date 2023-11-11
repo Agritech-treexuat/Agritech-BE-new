@@ -847,7 +847,6 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
       return res.status(404).json({ message: 'PlantCultivates not found' });
     }
 
-    const plans = plantCultivates.map((plantCultivate) => plantCultivate.plan)
     res.status(200).json({ plantCultivates });
   } catch (error) {
     console.error(error);
