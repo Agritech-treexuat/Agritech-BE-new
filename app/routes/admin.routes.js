@@ -71,7 +71,7 @@ module.exports = function(app) {
   );
 
   app.get(
-    "/plantCultivates/:farmId/:seedId",
+    "/plantCultivates/:farmId/:seed",
     controller.getPlantCultivateByFarmAndSeed
   );
 

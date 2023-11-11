@@ -277,9 +277,9 @@ exports.getAllPlantCultivate = async (req, res) => {
 // API để lấy tất cả PlantCultivate từ farmId và seedId
 exports.getPlantCultivateByFarmAndSeed = async (req, res) => {
   try {
-    const { farmId, seedId } = req.params;
+    const { farmId, seed } = req.params;
 
-    const plantCultivates = await PlantCultivate.find({ farmId, seedId });
+    const plantCultivates = await PlantCultivate.findOne({ farmId, seed });
 
     res.status(200).json({ plantCultivates });
   } catch (error) {

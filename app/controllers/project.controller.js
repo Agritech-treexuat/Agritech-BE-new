@@ -847,36 +847,7 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
       return res.status(404).json({ message: 'PlantCultivates not found' });
     }
 
-    // Lấy tất cả các kế hoạch của các plantCultivates
-    const plans = await Promise.all(plantCultivates.map(async (plantCultivate) => {
-      // Lặp qua từng kế hoạch của plantCultivate
-      const planWithNames = await Promise.all(plantCultivate.plan.map(async (plan) => {
-        // Lặp qua từng cultivateItem trong cultivativeItems
-        const cultivateItemsWithNames = await Promise.all(plan.cultivativeItems.map(async (item) => {
-          // Tìm cultivate theo cultivateId để lấy thông tin name
-          const cultivate = await Cultivative.findOne({ _id: item.cultivativeId });
-          // Thêm thông tin name vào item
-          return {
-            ...item.toObject(),
-            name: cultivate ? cultivate.name : null,
-            type: cultivate ? cultivate.type : null,
-          };
-        }));
-
-        // Trả về plan với thông tin name của cultivate
-        return {
-          ...plan.toObject(),
-          cultivativeItems: cultivateItemsWithNames,
-        };
-      }));
-
-      // Trả về plantCultivate với thông tin name của cultivate trong từng kế hoạch
-      return {
-        ...plantCultivate.toObject(),
-        plan: planWithNames,
-      };
-    }));
-
+    const plans = plantCultivates.map((plantCultivate) => plantCultivate.plan)
     res.status(200).json({ plans });
   } catch (error) {
     console.error(error);
@@ -891,7 +862,7 @@ exports.getPlanInFarmFromSeed = async (req, res) => {
     const { seed, farmId } = req.params;
 
     // Tìm thông tin cây trồng dựa trên seed
-    const plantCultivate = await PlantCultivate.findOne({ seed, farmId });
+    const plantCultivate = await PlantCultivate.find({ seed, farmId });
 
     if (!plantCultivate) {
       return res.status(404).json({ message: 'Plant not found' });

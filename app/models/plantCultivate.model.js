@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
 const cultivativeItem = mongoose.Schema({
-  cultivativeId: String,
+  name: String,
   amount_per_ha: Number,
 })
 
 const plan = new mongoose.Schema({
   cultivativeItems: [cultivativeItem],
   time: String,
-  note: String
+  note: String,
+  type: String
 })
 
 const plantCultivateSchema = new mongoose.Schema({
