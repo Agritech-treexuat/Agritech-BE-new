@@ -848,7 +848,7 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
     }
 
     const plans = plantCultivates.map((plantCultivate) => plantCultivate.plan)
-    res.status(200).json({ plans });
+    res.status(200).json({ plantCultivates });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
