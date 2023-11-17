@@ -749,9 +749,9 @@ exports.addPlantCultivate = async (req, res) => {
 exports.updatePlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const { plantCultivateId, seed, price, plan } = req.body;
+    const { plantCultivateId, price, plan } = req.body;
 
-    if (!plantCultivateId || !seed || !plan) {
+    if (!plantCultivateId || !plan) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
@@ -763,7 +763,6 @@ exports.updatePlantCultivate = async (req, res) => {
     }
 
     // Cập nhật thông tin của PlantCultivate
-    existingPlantCultivate.seed = seed;
     existingPlantCultivate.price = price;
     existingPlantCultivate.plan = plan;
 

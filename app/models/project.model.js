@@ -8,7 +8,8 @@ const cultivativeItem = new mongoose.Schema({
 const plan = new mongoose.Schema({
   cultivativeItems: [cultivativeItem],
   time: String,
-  note: String
+  note: String,
+  type: String
 })
 
 const npp = new mongoose.Schema({
