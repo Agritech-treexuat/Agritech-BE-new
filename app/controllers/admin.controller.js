@@ -83,7 +83,7 @@ exports.initProject = async (req, res) => {
 // API để thêm cây
 exports.addPlant = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, image } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: 'Tên cây là bắt buộc' });
@@ -97,7 +97,7 @@ exports.addPlant = async (req, res) => {
     }
 
     // Tạo một cây mới
-    const newPlant = new Plant({ name });
+    const newPlant = new Plant({ name, image });
 
     // Lưu cây vào cơ sở dữ liệu
     const savedPlant = await newPlant.save();
@@ -243,14 +243,14 @@ exports.getCultivativeById = async (req, res) => {
 exports.addPlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const {seedId, price, plan } = req.body;
+    const {seed, plantId, price, plan } = req.body;
 
-    if (!seedId || !plan) {
+    if (!seed || !plan || !plantId) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
     // Tạo một PlantCultivate mới
-    const newPlantCultivate = new PlantCultivate({ farmId, seedId, price, plan });
+    const newPlantCultivate = new PlantCultivate({ farmId, seed, price, plan, plantId });
 
     // Lưu PlantCultivate vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();
@@ -277,9 +277,9 @@ exports.getAllPlantCultivate = async (req, res) => {
 // API để lấy tất cả PlantCultivate từ farmId và seedId
 exports.getPlantCultivateByFarmAndSeed = async (req, res) => {
   try {
-    const { farmId, seedId } = req.params;
+    const { farmId, seed } = req.params;
 
-    const plantCultivates = await PlantCultivate.find({ farmId, seedId });
+    const plantCultivates = await PlantCultivate.findOne({ farmId, seed });
 
     res.status(200).json({ plantCultivates });
   } catch (error) {
