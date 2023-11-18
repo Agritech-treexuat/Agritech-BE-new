@@ -10,8 +10,75 @@ const PlantCultivate = require('../models/plantCultivate.model')
 const Plant = require('../models/plant.model')
 const Cultivative = require('../models/cultivative.model')
 
+const processFile = require("../middlewares/upload");
+const { format } = require("util");
+const { Storage } = require("@google-cloud/storage");
+// Instantiate a storage client with credentials
+const storage = new Storage({ keyFilename: "google-cloud-key.json" });
+const bucket = storage.bucket("agritech-data");
+
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
+
+const uploadFile = (f, res) => {
+  return new Promise((resolve, reject) => {
+    const { originalname, buffer } = f;
+    var filename = originalname.toLowerCase().split(" ").join("-");
+
+    filename = filename;
+
+    console.log(filename);
+
+    const blob = bucket.file(filename);
+
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+    });
+
+    blobStream.on("error", (err) => {
+      res.status(500).send({ message: err.message });
+      reject(err);
+    });
+
+    blobStream.on("finish", async (data) => {
+      const publicUrl = format(
+        `https://storage.googleapis.com/${bucket.name}/${blob.name}`
+      );
+
+      try {
+        await bucket.file(filename).makePublic();
+        resolve(publicUrl);
+      } catch (err) {
+        console.log("failed to make it public");
+        reject(err);
+      }
+    });
+
+    blobStream.end(buffer);
+  });
+};
+
+exports.upload = async (req, res) => {
+  const urlList = [];
+  console.log("Req: ", req.body, req)
+  await processFile(req, res); //multer
+  console.log("Passed")
+
+  for (var i = 0; i < req.files.length; i++) {
+    if (!req.files[i]) {
+      return res.status(400).send({ message: "Please upload a file!" });
+    }
+
+    const publicUrl = await uploadFile(req.files[i], res);
+    urlList.push(publicUrl);
+  }
+
+  return res.status(200).send({
+    message: "Uploaded the files successfully",
+    urlList: urlList
+  });
+};
+
 
 // API để lấy thông tin cá nhân của người dùng hiện tại
 exports.getMyProfile = async (req, res) => {
@@ -49,6 +116,29 @@ exports.initProject = async (req, res) => {
   // console.log("Req: ", req)
   // Nếu yêu cầu đã được kiểm tra và có đủ quyền (qua middleware)
   // Bạn có thể tiến hành tạo project
+  await processFile(req, res);
+
+  if (req.files && req.files.length > 0) {
+    // Lưu từng ảnh vào Google Cloud Storage và lấy đường dẫn
+    const imageUrls = [];
+    for (const file of req.files) {
+      const imageBuffer = file.buffer;
+      const fileName = `${Date.now()}_${file.originalname}`;
+      const fileObject = bucket.file(fileName);
+
+      const fileStream = fileObject.createWriteStream({
+        metadata: {
+          contentType: file.mimetype,
+        },
+      });
+
+      fileStream.end(imageBuffer);
+
+      // Lấy đường dẫn của ảnh trên Google Cloud Storage
+      const imageUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+      imageUrls.push(imageUrl);
+    }
+  }
   try {
     // Lấy dữ liệu từ yêu cầu
     const farmID = req.userId;

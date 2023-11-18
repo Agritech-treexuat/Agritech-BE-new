@@ -119,5 +119,7 @@ module.exports = function(app) {
 
   app.get("/farm/me", [authJwt.verifyToken], controller.getMyProfile);
 
+  app.post("/upload", controller.upload)
+
 
 };
