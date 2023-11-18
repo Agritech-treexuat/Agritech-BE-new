@@ -59,11 +59,11 @@ const uploadFile = (f, res) => {
   });
 };
 
-exports.upload = async (req, res) => {
+exports.upload = async (req, res, next) => {
   const urlList = [];
-  // console.log("Req: ", req.body, req)
+  console.log("Req: ", req.body)
   await processFile(req, res); //multer
-  // console.log("Passed")
+  console.log("Passed: ", req.files)
 
   for (var i = 0; i < req.files.length; i++) {
     if (!req.files[i]) {
@@ -74,10 +74,14 @@ exports.upload = async (req, res) => {
     urlList.push(publicUrl);
   }
 
-  return res.status(200).send({
-    message: "Uploaded the files successfully",
-    urlList: urlList
-  });
+  console.log("url: ", urlList)
+
+  req.urlList = urlList;
+  next()
+
+  // return res.status(200).send({
+  //   message: "Uploaded the files successfully"
+  // });
 };
 
 
@@ -114,37 +118,20 @@ exports.getMyProfile = async (req, res) => {
 // Hành động khởi tạo một project
 // Xử lý yêu cầu khởi tạo project từ farm
 exports.initProject = async (req, res) => {
-  // console.log("Req: ", req)
-  // Nếu yêu cầu đã được kiểm tra và có đủ quyền (qua middleware)
-  // Bạn có thể tiến hành tạo project
-  await processFile(req, res);
-
-  if (req.files && req.files.length > 0) {
-    // Lưu từng ảnh vào Google Cloud Storage và lấy đường dẫn
-    const imageUrls = [];
-    for (const file of req.files) {
-      const imageBuffer = file.buffer;
-      const fileName = `${Date.now()}_${file.originalname}`;
-      const fileObject = bucket.file(fileName);
-
-      const fileStream = fileObject.createWriteStream({
-        metadata: {
-          contentType: file.mimetype,
-        },
-      });
-
-      fileStream.end(imageBuffer);
-
-      // Lấy đường dẫn của ảnh trên Google Cloud Storage
-      const imageUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-      imageUrls.push(imageUrl);
-    }
-  }
   try {
     // Lấy dữ liệu từ yêu cầu
     const farmID = req.userId;
-    const { input, name } = req.body;
+    const { name, tx, initDate, seed, amount  } = req.body;
+    const urlList = req.urlList
     const contractID = req.body.contractID || null;
+
+    const input = {
+      tx,
+      initDate,
+      seed,
+      amount,
+      images: urlList
+    }
 
     // Tìm farm dựa trên farmID
     const farm = await Farm.find({ _id: new mongoose.Types.ObjectId(farmID) });
@@ -169,6 +156,10 @@ exports.initProject = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
+
+  // console.log("req now: ", req.body)
+  // console.log("req now 2: ", req.files)
+  // return res.status(201).json({ message: 'Project created successfully'});
 };
 
 // Xu ly yeu cau them projct tu farm

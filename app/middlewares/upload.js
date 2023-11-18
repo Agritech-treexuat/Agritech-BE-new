@@ -3,7 +3,7 @@ const Multer = require("multer");
 
 let processFile = Multer({
   storage: Multer.memoryStorage(),
-}).any();
+}).array("images");
 
 let processFileMiddleware = util.promisify(processFile);
 module.exports = processFileMiddleware;

@@ -12,7 +12,7 @@ module.exports = function(app) {
 
   app.post(
     "/farm/initProject",
-    [authJwt.verifyToken, authJwt.isFarm],
+    [authJwt.verifyToken, authJwt.isFarm, controller.upload],
     controller.initProject
   );
 
