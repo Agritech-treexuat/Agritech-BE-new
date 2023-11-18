@@ -2,7 +2,7 @@
 const Farm = require('../models/farm.model');
 const Project = require('../models/project.model');
 const {mongoose} = require('mongoose')
-
+const uuidv4 = require('uuid').v4;
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
@@ -24,8 +24,9 @@ const uploadFile = (f, res) => {
   return new Promise((resolve, reject) => {
     const { originalname, buffer } = f;
     var filename = originalname.toLowerCase().split(" ").join("-");
-
-    filename = filename;
+    const timestamp = Date.now();
+    const randomSuffix = uuidv4().split('-').join('');
+    filename = `${timestamp}_${randomSuffix}_${filename}`;
 
     console.log(filename);
 
@@ -60,9 +61,9 @@ const uploadFile = (f, res) => {
 
 exports.upload = async (req, res) => {
   const urlList = [];
-  console.log("Req: ", req.body, req)
+  // console.log("Req: ", req.body, req)
   await processFile(req, res); //multer
-  console.log("Passed")
+  // console.log("Passed")
 
   for (var i = 0; i < req.files.length; i++) {
     if (!req.files[i]) {
