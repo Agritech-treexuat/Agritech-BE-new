@@ -6,9 +6,9 @@ const uuidv4 = require('uuid').v4;
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
-const PlantCultivate = require('../models/plantCultivate.model')
+const PlantFarming = require('../models/plantFarming.model')
 const Plant = require('../models/plant.model')
-const Cultivative = require('../models/cultivative.model')
+const Agro_Chemicals = require('../models/agroChemical.model')
 
 const processFile = require("../middlewares/upload");
 const { format } = require("util");
@@ -814,20 +814,20 @@ exports.addPlantCultivate = async (req, res) => {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
-    // Tạo một PlantCultivate mới
-    const newPlantCultivate = new PlantCultivate({ farmId, seed, price, plan, plantId });
+    // Tạo một PlantFarming mới
+    const newPlantCultivate = new PlantFarming({ farmId, seed, price, plan, plantId });
 
-    // Lưu PlantCultivate vào cơ sở dữ liệu
+    // Lưu PlantFarming vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();
 
-    res.status(201).json({ message: 'PlantCultivate đã được thêm', plantCultivate: savedPlantCultivate });
+    res.status(201).json({ message: 'PlantFarming đã được thêm', plantFarming: savedPlantCultivate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
   }
 };
 
-// API endpoint để cập nhật thông tin của một PlantCultivate
+// API endpoint để cập nhật thông tin của một PlantFarming
 exports.updatePlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
@@ -837,21 +837,21 @@ exports.updatePlantCultivate = async (req, res) => {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
-    // Kiểm tra xem PlantCultivate có tồn tại không
-    const existingPlantCultivate = await PlantCultivate.findOne({ _id: plantCultivateId, farmId });
+    // Kiểm tra xem PlantFarming có tồn tại không
+    const existingPlantCultivate = await PlantFarming.findOne({ _id: plantCultivateId, farmId });
 
     if (!existingPlantCultivate) {
-      return res.status(404).json({ message: 'PlantCultivate không tồn tại hoặc không thuộc sở hữu của bạn' });
+      return res.status(404).json({ message: 'PlantFarming không tồn tại hoặc không thuộc sở hữu của bạn' });
     }
 
-    // Cập nhật thông tin của PlantCultivate
+    // Cập nhật thông tin của PlantFarming
     existingPlantCultivate.price = price;
     existingPlantCultivate.plan = plan;
 
-    // Lưu PlantCultivate đã cập nhật vào cơ sở dữ liệu
+    // Lưu PlantFarming đã cập nhật vào cơ sở dữ liệu
     const updatedPlantCultivate = await existingPlantCultivate.save();
 
-    res.status(200).json({ message: 'PlantCultivate đã được cập nhật', plantCultivate: updatedPlantCultivate });
+    res.status(200).json({ message: 'PlantFarming đã được cập nhật', plantFarming: updatedPlantCultivate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
@@ -922,7 +922,7 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
     const { farmId, plantId } = req.params;
 
     // Tìm tất cả các plantCultivates dựa trên farmId và plantId
-    const plantCultivates = await PlantCultivate.find({ farmId, plantId });
+    const plantCultivates = await PlantFarming.find({ farmId, plantId });
 
     if (!plantCultivates || plantCultivates.length === 0) {
       return res.status(404).json({ message: 'PlantCultivates not found' });
@@ -942,14 +942,14 @@ exports.getPlanInFarmFromSeed = async (req, res) => {
     const { seed, farmId } = req.params;
 
     // Tìm thông tin cây trồng dựa trên seed
-    const plantCultivate = await PlantCultivate.find({ seed, farmId });
+    const plantFarming = await PlantFarming.find({ seed, farmId });
 
-    if (!plantCultivate) {
+    if (!plantFarming) {
       return res.status(404).json({ message: 'Plant not found' });
     }
 
     // Trả về thông tin kế hoạch của cây trồng
-    res.status(200).json({ plan: plantCultivate.plan });
+    res.status(200).json({ plan: plantFarming.plan });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

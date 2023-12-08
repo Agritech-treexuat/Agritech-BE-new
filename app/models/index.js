@@ -5,18 +5,21 @@ const db = {};
 
 db.mongoose = mongoose;
 
-db.farm = require("./farm.model");
+db.agroChemical = require("./agroChemical.model");
 db.contract = require("./contract.model");
-db.plantCultivate = require("./plantCultivate.model");
-db.project = require("./project.model");
-db.qr = require("./project.model");
-db.client = require("./client.model");
+db.image = require("./image.model");
 db.plant = require("./plant.model");
-db.seed = require("./seed.model");
-db.cultivative = require("./cultivative.model")
-
-db.user = require("./user.model");
+db.project = require("./project.model");
 db.role = require("./role.model");
+db.serviceRequest = require("./serviceRequest.model");
+db.user = require("./user.model");
+
+db.client = require("./client.model");
+db.farm = require("./farm.model");
+db.qr = require("./qr.model");
+db.seed = require("./seed.model");
+db.serviceTemplate = require("./serviceTemplate.model");
+db.weather = require("./weather.model");
 
 db.ROLES = ["farm", "admin", "client"];
 

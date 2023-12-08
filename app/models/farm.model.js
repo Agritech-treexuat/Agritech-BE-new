@@ -11,7 +11,9 @@ const farmSchema = new mongoose.Schema({
   images: [String],
   square: Number,
   password: String, // Thêm trường password
-  plant: [String]
+  plant: [String],
+  district: String,
+  cameraId: [String]
 });
 
 const Farm = mongoose.model('Farm', farmSchema);
