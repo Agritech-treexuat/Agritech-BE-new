@@ -21,10 +21,10 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addProcessToProject);
 
-  app.post(
-    "/farm/project/addImage/:projectId",
-    [authJwt.verifyToken, authJwt.isFarm],
-    controller.addImageToProject);
+  // app.post(
+  //   "/farm/project/addImage/:projectId",
+  //   [authJwt.verifyToken, authJwt.isFarm],
+  //   controller.addImageToProject);
 
   app.post(
     "/farm/project/addOutput/:projectId",
