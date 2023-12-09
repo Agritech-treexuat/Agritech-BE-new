@@ -8,7 +8,7 @@ const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
 const PlantFarming = require('../models/plantFarming.model')
 const Plant = require('../models/plant.model')
-const Agro_Chemicals = require('../models/agroChemical.model')
+const AgroChemicals = require('../models/agroChemical.model')
 
 const processFile = require("../middlewares/upload");
 const { format } = require("util");
@@ -83,7 +83,6 @@ exports.upload = async (req, res, next) => {
   //   message: "Uploaded the files successfully"
   // });
 };
-
 
 // API để lấy thông tin cá nhân của người dùng hiện tại
 exports.getMyProfile = async (req, res) => {
@@ -176,26 +175,6 @@ exports.addProcessToProject = async (req, res) => {
     project.process.push(processData);
     const updatedProject = await project.save();
     return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process});
-  }
-  catch(error) {
-    console.error(error);
-    res.status(500).send({ message: error });
-  };
-};
-
-exports.addImageToProject = async (req, res) => {
-  try {
-    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
-    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
-    const imageData = req.body;
-    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
-    if (!project) {
-      return res.status(403).send({ message: "Farm does not have access to this project." });
-    }
-    // Thêm quy trình vào dự án
-    project.image.push(imageData);
-    const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add image to project successfully', updatedProject: updatedProject});
   }
   catch(error) {
     console.error(error);
@@ -329,11 +308,16 @@ exports.getImages = async (req, res) => {
       return res.status(404).json({ message: "Project not found." });
     }
 
-    let images = project.image;
+    const cameraId = req.params.cameraId ? req.params.cameraId : project.cameraId[0];
+    let images = await Image.findOne({ cameraId: cameraId }); // Lấy thông tin dự án
+    if (!images) {
+      return res.status(404).json({ message: "Camera not found." });
+    }
+    // let cameraId = project.cameraId
 
     if (searchDate) {
-      images = project.image.filter(image => {
-        return image.time >= searchDate && image.time < nextDate;
+      images = images.filter(image => {
+        return image.date >= searchDate && image.date < nextDate;
       });
     }
 
@@ -396,8 +380,8 @@ exports.getExpects = async (req, res) => {
     let expects = project.expect;
 
     if (searchDate) {
-      expects = project.expect.filter(output => {
-        return output.time >= searchDate && output.time < nextDate;
+      expects = project.expect.filter(expect => {
+        return expect.time >= searchDate && expect.time < nextDate;
       });
     }
 
@@ -498,7 +482,7 @@ exports.editProcess = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     process.historyProcess.push({
       ...previousProcessData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -545,7 +529,7 @@ exports.editOutput = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     output.historyOutput.push({
       ...previousOutputData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -592,7 +576,7 @@ exports.editExpect = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     expect.historyExpect.push({
       ...previousExpectData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -634,7 +618,7 @@ exports.editInput = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     input.historyInput.push({
       ...previousInputData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -665,10 +649,10 @@ exports.exportQR = async (req, res) => {
       return res.status(404).json({ message: "Output not found." });
     }
 
-    const { amount, amount_perOne, npp } = output;
+    const { amount, amountPerOne, npp } = output;
 
     // Tính số lượng sản phẩm
-    const a = Math.floor(amount / amount_perOne);
+    const a = Math.floor(amount / amountPerOne);
 
     // Lưu trữ danh sách QR codes
     const qrCodes = [];
@@ -808,19 +792,19 @@ exports.getPlantsFarm = async (req, res) => {
 exports.addPlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const {seed, plantId, price, plan } = req.body;
+    const {seed, plantId, price, plan, timeCultivates } = req.body;
 
     if (!seed || !plan) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
     // Tạo một PlantFarming mới
-    const newPlantCultivate = new PlantFarming({ farmId, seed, price, plan, plantId });
+    const newPlantCultivate = new PlantFarming({ farmId, seed, price, plan, plantId, timeCultivates });
 
     // Lưu PlantFarming vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();
 
-    res.status(201).json({ message: 'PlantFarming đã được thêm', plantFarming: savedPlantCultivate });
+    res.status(201).json({ message: 'PlantFarming đã được thêm', plantCultivate: savedPlantCultivate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
@@ -831,9 +815,9 @@ exports.addPlantCultivate = async (req, res) => {
 exports.updatePlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const { plantCultivateId, price, plan } = req.body;
+    const { plantCultivateId, price, plan, timeCultivates } = req.body;
 
-    if (!plantCultivateId || !plan) {
+    if (!plantCultivateId) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
@@ -847,6 +831,7 @@ exports.updatePlantCultivate = async (req, res) => {
     // Cập nhật thông tin của PlantFarming
     existingPlantCultivate.price = price;
     existingPlantCultivate.plan = plan;
+    existingPlantCultivate.timeCultivates = timeCultivates;
 
     // Lưu PlantFarming đã cập nhật vào cơ sở dữ liệu
     const updatedPlantCultivate = await existingPlantCultivate.save();
@@ -934,7 +919,6 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 // API endpoint để lấy thông tin kế hoạch từ seed
 exports.getPlanInFarmFromSeed = async (req, res) => {
