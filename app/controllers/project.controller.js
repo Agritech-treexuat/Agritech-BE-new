@@ -8,6 +8,7 @@ const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
 const PlantFarming = require('../models/plantFarming.model')
 const Plant = require('../models/plant.model')
+const Image = require('../models/image.model')
 const AgroChemicals = require('../models/agroChemical.model')
 
 const processFile = require("../middlewares/upload");
@@ -906,14 +907,14 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
   try {
     const { farmId, plantId } = req.params;
 
-    // Tìm tất cả các plantCultivates dựa trên farmId và plantId
-    const plantCultivates = await PlantFarming.find({ farmId, plantId });
+    // Tìm tất cả các plantFarming dựa trên farmId và plantId
+    const plantFarming = await PlantFarming.find({ farmId, plantId });
 
-    if (!plantCultivates || plantCultivates.length === 0) {
-      return res.status(404).json({ message: 'PlantCultivates not found' });
+    if (!plantFarming || plantFarming.length === 0) {
+      return res.status(404).json({ message: 'plantFarming not found' });
     }
 
-    res.status(200).json({ plantCultivates });
+    res.status(200).json({ plantFarming });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });

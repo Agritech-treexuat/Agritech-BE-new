@@ -279,9 +279,9 @@ exports.getPlantCultivateByFarmAndSeed = async (req, res) => {
   try {
     const { farmId, seed } = req.params;
 
-    const plantCultivates = await PlantFarming.findOne({ farmId, seed });
+    const plantFarming = await PlantFarming.findOne({ farmId, seed });
 
-    res.status(200).json({ plantCultivates });
+    res.status(200).json({ plantFarming });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
