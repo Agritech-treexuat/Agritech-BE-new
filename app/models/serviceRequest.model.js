@@ -2,8 +2,13 @@ const mongoose = require('mongoose');
 
 
 const serviceRequestSchema = new mongoose.Schema({
+  date: Date,
+  clientId: String,
+  farmId: String,
   serviceTemplateId: String,
-  plantId: [String],
+  herbListPlantId: [String],
+  leafyListPlantId: [String],
+  rootListPlantId: [String],
   note: String,
   status: {
     type: String,
