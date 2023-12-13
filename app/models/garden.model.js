@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const deliveryDetailSchema = new mongoose.Schema({
-  plant: { type: mongoose.Schema.Types.ObjectId, ref: 'Plant' },
+  plant: String,
   amount: Number
 });
 
@@ -12,7 +12,7 @@ const clientRequestSchema = new mongoose.Schema({
     enum: ['newPlant', 'deliveryRequest', 'other'],
     default: 'other'
   },
-  newPlant: { type: mongoose.Schema.Types.ObjectId, ref: 'Plant' },
+  newPlant: String,
   deliveryDetails: [deliveryDetailSchema],
   note: String
 });
