@@ -66,21 +66,6 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.scanQR);
 
-  app.post(
-    "/farm/plantCultivates",
-    [authJwt.verifyToken, authJwt.isFarm],
-    controller.addPlantCultivate);
-
-  app.put(
-    "/farm/plantCultivates",
-    [authJwt.verifyToken, authJwt.isFarm],
-    controller.updatePlantCultivate);
-
-  app.post(
-    "/farm/plant",
-    [authJwt.verifyToken, authJwt.isFarm],
-    controller.addPlant);
-
   app.post("/farm/addPlantCultivate/:projectId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addPlantCultivateToProject);
@@ -92,11 +77,6 @@ module.exports = function(app) {
   app.get("/farm/plan/:projectId",
     controller.getPlanFromProject);
 
-  app.get("/farm/planInFarmFromPlant/:farmId/:plantId",
-    controller.getPlanInFarmFromPlantId);
-
-  app.get("/farm/planInFarmFromSeed/:farmId/:seed",
-    controller.getPlanInFarmFromSeed);
     // Lay tat ca moi thu
   app.get("/farm/projects/:farmId", controller.getAllProjectsByFarmId);
 
@@ -113,9 +93,6 @@ module.exports = function(app) {
   app.get("/farm/project/:projectId/input", controller.getInput);
 
   app.get('/farm/:farmId/projects', controller.getProjectsByFarmId);
-
-  app.get("/farm/plant/:farmId",
-    controller.getPlantsFarm);
 
   app.get("/farm/me", [authJwt.verifyToken], controller.getMyProfile);
 

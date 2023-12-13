@@ -1,25 +1,25 @@
 const mongoose = require('mongoose');
 
-const deliveryDetail = new mongoose.Schema({
-  plant: String,
+const deliveryDetailSchema = new mongoose.Schema({
+  plant: { type: mongoose.Schema.Types.ObjectId, ref: 'Plant' },
   amount: Number
-})
+});
 
-const clientRequest = new mongoose.Schema({
+const clientRequestSchema = new mongoose.Schema({
   date: Date,
   type: {
     type: String,
     enum: ['newPlant', 'deliveryRequest', 'other'],
     default: 'other'
   },
-  newPlant: String,
-  deliveryDetails: [deliveryDetail],
+  newPlant: { type: mongoose.Schema.Types.ObjectId, ref: 'Plant' },
+  deliveryDetails: [deliveryDetailSchema],
   note: String
-})
+});
 
-const delivery = new mongoose.Schema({
+const deliverySchema = new mongoose.Schema({
   date: Date,
-  deliveryDetails: [deliveryDetail],
+  deliveryDetails: [deliveryDetailSchema],
   note: String,
   status: {
     type: String,
@@ -28,18 +28,23 @@ const delivery = new mongoose.Schema({
   },
   clientAccept: Boolean,
   clientNote: String
-})
-
+});
 
 const contractSchema = new mongoose.Schema({
-  farmId: String,
-  clientId: String,
-  projectId: [String],
+  farmId: { type: mongoose.Schema.Types.ObjectId, ref: 'Farm' },
+  startDate: Date,
+  clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
+  projectId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
   note: String,
-  templateId: String,
-  serviceRequestId: String,
-  clientRequests: [clientRequest],
-  deliveries: [delivery],
+  templateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Template' },
+  serviceRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceRequest' },
+  clientRequests: [clientRequestSchema],
+  deliveries: [deliverySchema],
+  status: {
+    type: String,
+    enum: ['waiting', 'started', 'end'],
+    default: 'waiting'
+  }
 });
 
 const Contract = mongoose.model('Contract', contractSchema);

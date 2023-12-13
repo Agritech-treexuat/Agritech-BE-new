@@ -18,8 +18,8 @@ const plan = new mongoose.Schema({
 })
 
 const plantFarmingSchema = new mongoose.Schema({
-  farmId: String,
-  plantId: String,
+  farmId: { type: mongoose.Schema.Types.ObjectId, ref: 'Farm' },
+  plantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Plant' },
   seed: String,
   price: Number,
   plan: [plan],

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const scanHistory = new mongoose.Schema({
-  qrId: String,
+  qrId: { type: mongoose.Schema.Types.ObjectId, ref: 'QR' },
   date: String,
 })
 
