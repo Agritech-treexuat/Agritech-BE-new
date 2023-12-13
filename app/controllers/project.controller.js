@@ -123,7 +123,6 @@ exports.initProject = async (req, res) => {
     const farmID = req.userId;
     const { name, tx, initDate, seed, amount  } = req.body;
     const urlList = req.urlList
-    const contractID = req.body.contractID || null;
 
     const input = {
       tx,
@@ -144,7 +143,6 @@ exports.initProject = async (req, res) => {
     const project = new Project({
       farmID,
       name,
-      contractID,
       input
     });
 

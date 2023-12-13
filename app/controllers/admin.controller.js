@@ -53,7 +53,6 @@ exports.initProject = async (req, res) => {
     // Lấy dữ liệu từ yêu cầu
     const farmID = req.userId;
     const { input, name } = req.body;
-    const contractID = req.body.contractID || null;
 
     // Tìm farm dựa trên farmID
     const farm = await Farm.find({ _id: new mongoose.Types.ObjectId(farmID) });
@@ -66,7 +65,6 @@ exports.initProject = async (req, res) => {
     const project = new Project({
       farmID,
       name,
-      contractID,
       input
     });
 
