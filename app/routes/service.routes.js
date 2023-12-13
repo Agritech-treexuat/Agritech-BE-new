@@ -13,4 +13,7 @@ module.exports = function(app) {
   app.get('/serviceTemplate/:farmId', controller.getAllServiceTemplates);
   app.post('/serviceTemplate/add', [authJwt.verifyToken, authJwt.isFarm], controller.addServiceTemplate);
   app.put('/serviceTemplate/update/:serviceTemplateId', [authJwt.verifyToken, authJwt.isFarm], controller.updateServiceTemplate);
+  app.post('/serviceRequest/create', [authJwt.verifyToken, authJwt.isClient], controller.createServiceRequest);
+  app.get('/serviceRequest/farm', controller.getFarmServiceRequests);
+  app.patch('/serviceRequest/update/:requestId', [authJwt.verifyToken, authJwt.isFarm], controller.updateServiceRequestStatus);
 };

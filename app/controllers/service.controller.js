@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const ServiceTemplate = require('../models/serviceTemplate.model');
+const ServiceRequest = require('../models/serviceRequest.model');
+const Farm = require('../models/farm.model');
+const Plant = require('../models/plant.model');
+const Client = require('../models/client.model');
 
 exports.getAllServiceTemplates = async (req, res) => {
   try {
@@ -73,6 +77,131 @@ exports.updateServiceTemplate = async (req, res) => {
     const allServiceTemplates = await ServiceTemplate.find({ farmId: farmId });
 
     res.status(200).json({ message: 'ServiceTemplate updated successfully', serviceTemplate: updatedServiceTemplate, allServiceTemplates });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.createServiceRequest = async (req, res) => {
+  try {
+    const clientId = req.userId;
+    const { farmId, serviceTemplateId, herbListPlantId, leafyListPlantId, rootListPlantId, note } = req.body;
+
+    // Kiểm tra xem farm có tồn tại không
+    const isFarmExists = await Farm.exists({ farmID: farmId });
+    if (!isFarmExists) {
+      return res.status(404).json({ message: 'Farm not found' });
+    }
+
+    // Kiểm tra xem serviceTemplateId có thuộc farm đó không
+    const isTemplateInFarm = await ServiceTemplate.exists({ _id: serviceTemplateId, farmId: farmId });
+    if (!isTemplateInFarm) {
+      return res.status(404).json({ message: 'Service template not found in the farm' });
+    }
+
+    // Tiếp tục tạo ServiceRequest nếu mọi thứ hợp lệ
+    const newServiceRequest = new ServiceRequest({
+      date: new Date(),
+      clientId,
+      farmId,
+      serviceTemplateId,
+      herbListPlantId,
+      leafyListPlantId,
+      rootListPlantId,
+      note,
+      status: "waiting"
+    });
+
+    const savedServiceRequest = await newServiceRequest.save();
+
+    res.status(201).json({ message: 'Service request created successfully', serviceRequest: savedServiceRequest });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
+exports.getFarmServiceRequests = async (req, res) => {
+  try {
+    const { farmId, status } = req.query;
+
+    const filter = { farmId };
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const serviceRequests = await ServiceRequest.find(filter);
+
+    const requestsAllInformation = await Promise.all(serviceRequests.map(async (request) => {
+      // Lấy thông tin của client
+      const client = await Client.find({clientId: request.clientId});
+
+      // Lấy thông tin của service template
+      const serviceTemplate = await ServiceTemplate.findById(request.serviceTemplateId);
+
+      // Lấy thông tin của các cây herb, leafy, root từ plantId
+      const herbList = await Plant.find({ _id: { $in: request.herbListPlantId } });
+      const leafyList = await Plant.find({ _id: { $in: request.leafyListPlantId } });
+      const rootList = await Plant.find({ _id: { $in: request.herbListPlantId } });
+
+      return {
+        _id: request._id,
+        date: request.date,
+        clientId: request.clientId,
+        name: client.name ? client.name : "chua khai bao ten",
+        address: client.address ? client.address : "chua khai bao dia chi",
+        phone: client.phone ? client.phone : "chua khai bao sdt",
+        square: serviceTemplate.square,
+        price: serviceTemplate.price,
+        expectDeliveryPerWeek: serviceTemplate.expectDeliveryPerWeek,
+        expectedOutput: serviceTemplate.expectedOutput,
+        expectDeliveryAmount: serviceTemplate.expectDeliveryAmount,
+        herbMax: serviceTemplate.herbMax,
+        leafyMax: serviceTemplate.leafyMax,
+        rootMax: serviceTemplate.rootMax,
+        herbList,
+        leafyList,
+        rootList,
+        note: request.note,
+        status: request.status,
+      };
+    }));
+
+    res.status(200).json({ requestsAllInformation });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
+exports.updateServiceRequestStatus = async (req, res) => {
+  try {
+    const farmId = req.userId
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    // Kiểm tra xem ServiceRequest có tồn tại và thuộc về farmId không
+    const existingServiceRequest = await ServiceRequest.findOne({ _id: requestId, farmId: farmId });
+
+    if (!existingServiceRequest) {
+      return res.status(404).json({ message: 'Service request not found or does not belong to the farm' });
+    }
+
+    // Tiến hành cập nhật trạng thái
+    const updatedServiceRequest = await ServiceRequest.findByIdAndUpdate(
+      requestId,
+      { $set: { status } },
+      { new: true }
+    );
+
+    // Lấy danh sách các serviceRequests có status là 'waiting'
+    const waitingServiceRequests = await ServiceRequest.find({ farmId: farmId, status: 'waiting' });
+
+    res.status(200).json({ message: 'Service request status updated successfully', serviceRequest: updatedServiceRequest, waitingServiceRequests: waitingServiceRequests });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });

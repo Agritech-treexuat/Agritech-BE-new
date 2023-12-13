@@ -6,14 +6,12 @@ const scanHistory = new mongoose.Schema({
 })
 
 const clientSchema = new mongoose.Schema({
-  id: String,
-  profile: {
-    name: String,
-    phone: String,
-    email: String,
-    birth: String,
-    address: String,
-  },
+  clientId: String,
+  email: String,
+  name: String,
+  phone: String,
+  birth: String,
+  address: String,
   map: Object,
   district: String,
   password: String, // Thêm trường password
