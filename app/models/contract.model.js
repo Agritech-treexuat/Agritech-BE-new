@@ -1,35 +1,45 @@
 const mongoose = require('mongoose');
 
-const contractSchema = new mongoose.Schema({
-  id: String,
-  type: Number,
-  plant: [{
-    name: String,
-    plan: {
-      phan_bon: [{
-        name: String,
-        amount_per_kg: Number,
-        description: String,
-      }],
-      thuoc_BVTV: [{
-        name: String,
-        amount_per_kg: Number,
-        description: String,
-      }],
-    },
-  }],
-  clientID: String,
-  projectID: String,
+const deliveryDetail = new mongoose.Schema({
+  plant: String,
+  amount: Number
+})
+
+const clientRequest = new mongoose.Schema({
+  date: Date,
+  type: {
+    type: String,
+    enum: ['newPlant', 'deliveryRequest', 'other'],
+    default: 'other'
+  },
+  newPlant: String,
+  deliveryDetails: [deliveryDetail],
+  note: String
+})
+
+const delivery = new mongoose.Schema({
+  date: Date,
+  deliveryDetails: [deliveryDetail],
   note: String,
-  tx_hash: String,
-  delivery: [{
-    tx: String,
-    date: String,
-    plant: [{
-      name: String,
-      amount: String,
-    }],
-  }],
+  status: {
+    type: String,
+    enum: ['coming', 'done', 'cancel'],
+    default: 'coming'
+  },
+  clientAccept: Boolean,
+  clientNote: String
+})
+
+
+const contractSchema = new mongoose.Schema({
+  farmId: String,
+  clientId: String,
+  projectId: [String],
+  note: String,
+  templateId: String,
+  serviceRequestId: String,
+  clientRequests: [clientRequest],
+  deliveries: [delivery],
 });
 
 const Contract = mongoose.model('Contract', contractSchema);

@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
-const cultivativeItem = new mongoose.Schema({
+const agroChemicalItem = new mongoose.Schema({
   name: String,
-  amount_per_ha: Number,
+  amountPerHa: Number,
 });
 
 const plan = new mongoose.Schema({
-  cultivativeItems: [cultivativeItem],
+  agroChemicalItems: [agroChemicalItem],
   time: String,
   note: String,
   type: String
@@ -20,20 +20,20 @@ const npp = new mongoose.Schema({
 const historyOutput = new mongoose.Schema({
   tx: String,
   amount: Number,
-  amount_perOne: Number,
+  amountPerOne: Number,
   images: [String],
   time: Date,
-  modified_at: Date,
+  modifiedAt: Date,
   npp: [npp],
 })
 
 const historyProcess = new mongoose.Schema({
   tx: String,
   type: String,
-  cultivativeItems: [cultivativeItem],
+  agroChemicalItems: [agroChemicalItem],
   note: String,
   time: Date,
-  modified_at: Date
+  modifiedAt: Date
 });
 
 const historyExpect = new mongoose.Schema({
@@ -41,7 +41,7 @@ const historyExpect = new mongoose.Schema({
   amount: String,
   note: String,
   time: Date,
-  modified_at: Date
+  modifiedAt: Date
 });
 
 const historyInput = new mongoose.Schema({
@@ -51,14 +51,14 @@ const historyInput = new mongoose.Schema({
   amount: Number,
   images: [String],
   expect: String,
-  modified_at: Date
+  modifiedAt: Date
 });
 
 
 const output = new mongoose.Schema({
   tx: String,
   amount: Number,
-  amount_perOne: Number,
+  amountPerOne: Number,
   images: [String],
   time: Date,
   isEdited: Boolean,
@@ -70,7 +70,7 @@ const output = new mongoose.Schema({
 const process = new mongoose.Schema({
   tx: String,
   type: String,
-  cultivativeItems: [cultivativeItem],
+  agroChemicalItems: [agroChemicalItem],
   time: Date,
   note: String,
   isEdited: Boolean,
@@ -86,27 +86,10 @@ const expect = new mongoose.Schema({
   historyExpect: [historyExpect],
 });
 
-const image = new mongoose.Schema({
-  tx: String,
-  hash: String,
-  imageUrl: String,
-  time: Date
-})
-
-const weather = new mongoose.Schema({
-  date: Date,
-  description: String,
-  temp: Number,
-  humidity: Number,
-  speed: Number
-})
-
 const projectSchema = new mongoose.Schema({
   id: String,
-  contractID: String,
   farmID: String,
   name: String,
-  pId: Number,
   input: {
     tx: String,
     initDate: Date,
@@ -117,12 +100,12 @@ const projectSchema = new mongoose.Schema({
     isEdited: Boolean,
     historyInput: [historyInput]
   },
-  output: [output],
-  process: [process],
+  plan: [plan],
   expect: [expect],
-  image: [image],
-  weather: [weather],
-  plan: [plan]
+  process: [process],
+  output: [output],
+  cameraId: [String],
+  status: String
 });
 
 const Project = mongoose.model('Project', projectSchema);

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const qrSchema = new mongoose.Schema({
+  privateId: String,
   isScanned: Boolean,
   time: Date,
   timeScanned: Date,

@@ -7,8 +7,8 @@ const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const Plant = require('../models/plant.model');
 const Seed = require('../models/seed.model');
-const PlantCultivate = require('../models/plantCultivate.model');
-const Cultivative = require('../models/cultivative.model');
+const PlantFarming = require('../models/plantFarming.model');
+const AgroChemicals = require('../models/agroChemical.model');
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
@@ -83,7 +83,7 @@ exports.initProject = async (req, res) => {
 // API để thêm cây
 exports.addPlant = async (req, res) => {
   try {
-    const { name, image } = req.body;
+    const { name, ...other_info } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: 'Tên cây là bắt buộc' });
@@ -97,7 +97,7 @@ exports.addPlant = async (req, res) => {
     }
 
     // Tạo một cây mới
-    const newPlant = new Plant({ name, image });
+    const newPlant = new Plant({ name, ...other_info });
 
     // Lưu cây vào cơ sở dữ liệu
     const savedPlant = await newPlant.save();
@@ -124,7 +124,7 @@ exports.getPlants = async (req, res) => {
 // API để thêm seed
 exports.addSeed = async (req, res) => {
   try {
-    const { plantId, name, images } = req.body;
+    const { plantId, name, ...other_info } = req.body;
 
     if (!plantId || !name) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
@@ -138,7 +138,7 @@ exports.addSeed = async (req, res) => {
     }
 
     // Tạo một seed mới
-    const newSeed = new Seed({ plantId, name, images });
+    const newSeed = new Seed({ plantId, name, ...other_info });
 
     // Lưu seed vào cơ sở dữ liệu
     const savedSeed = await newSeed.save();
@@ -180,39 +180,39 @@ exports.getSeedsByPlantId = async (req, res) => {
   }
 };
 
-// API để thêm Cultivative
+// API để thêm AgroChemicals
 exports.addCultivative = async (req, res) => {
   try {
     const { name, type, note, images } = req.body;
 
     if (!name || !type) {
-      return res.status(400).json({ message: 'Tên và loại của Cultivative là bắt buộc' });
+      return res.status(400).json({ message: 'Tên và loại của AgroChemicals là bắt buộc' });
     }
 
-    // Kiểm tra xem đã tồn tại Cultivative với cùng name và type hay chưa
-    const existingCultivative = await Cultivative.findOne({ name, type });
+    // Kiểm tra xem đã tồn tại AgroChemicals với cùng name và type hay chưa
+    const existingCultivative = await AgroChemicals.findOne({ name, type });
 
     if (existingCultivative) {
-      return res.status(400).json({ message: 'Cultivative với tên và loại này đã tồn tại' });
+      return res.status(400).json({ message: 'AgroChemicals với tên và loại này đã tồn tại' });
     }
 
-    // Tạo một Cultivative mới
-    const newCultivative = new Cultivative({ name, type, note, images });
+    // Tạo một AgroChemicals mới
+    const newCultivative = new AgroChemicals({ name, type, note, images });
 
-    // Lưu Cultivative vào cơ sở dữ liệu
+    // Lưu AgroChemicals vào cơ sở dữ liệu
     const savedCultivative = await newCultivative.save();
 
-    res.status(201).json({ message: 'Cultivative đã được thêm', cultivative: savedCultivative });
+    res.status(201).json({ message: 'AgroChemicals đã được thêm', cultivative: savedCultivative });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
   }
 };
 
-// API để lấy tất cả Cultivative
+// API để lấy tất cả AgroChemicals
 exports.getAllCultivative = async (req, res) => {
   try {
-    const allCultivative = await Cultivative.find();
+    const allCultivative = await AgroChemicals.find();
 
     res.status(200).json({ cultivatives: allCultivative });
   } catch (error) {
@@ -221,15 +221,15 @@ exports.getAllCultivative = async (req, res) => {
   }
 };
 
-// API để lấy Cultivative dựa vào id
+// API để lấy AgroChemicals dựa vào id
 exports.getCultivativeById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const cultivative = await Cultivative.findById(id);
+    const cultivative = await AgroChemicals.findById(id);
 
     if (!cultivative) {
-      return res.status(404).json({ message: 'Không tìm thấy Cultivative' });
+      return res.status(404).json({ message: 'Không tìm thấy AgroChemicals' });
     }
 
     res.status(200).json({ cultivative });
@@ -239,33 +239,33 @@ exports.getCultivativeById = async (req, res) => {
   }
 };
 
-// API để thêm PlantCultivate
+// API để thêm PlantFarming
 exports.addPlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const {seed, plantId, price, plan } = req.body;
+    const {seed, plantId, plan, ...other_info } = req.body;
 
     if (!seed || !plan || !plantId) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
-    // Tạo một PlantCultivate mới
-    const newPlantCultivate = new PlantCultivate({ farmId, seed, price, plan, plantId });
+    // Tạo một PlantFarming mới
+    const newPlantCultivate = new PlantFarming({ farmId, seed, plan, plantId, ...other_info });
 
-    // Lưu PlantCultivate vào cơ sở dữ liệu
+    // Lưu PlantFarming vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();
 
-    res.status(201).json({ message: 'PlantCultivate đã được thêm', plantCultivate: savedPlantCultivate });
+    res.status(201).json({ message: 'PlantFarming đã được thêm', plantFarming: savedPlantCultivate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
   }
 };
 
-// API để lấy tất cả PlantCultivate
+// API để lấy tất cả PlantFarming
 exports.getAllPlantCultivate = async (req, res) => {
   try {
-    const allPlantCultivate = await PlantCultivate.find();
+    const allPlantCultivate = await PlantFarming.find();
 
     res.status(200).json({ plantCultivates: allPlantCultivate });
   } catch (error) {
@@ -274,14 +274,14 @@ exports.getAllPlantCultivate = async (req, res) => {
   }
 };
 
-// API để lấy tất cả PlantCultivate từ farmId và seedId
+// API để lấy tất cả PlantFarming từ farmId và seedId
 exports.getPlantCultivateByFarmAndSeed = async (req, res) => {
   try {
     const { farmId, seed } = req.params;
 
-    const plantCultivates = await PlantCultivate.findOne({ farmId, seed });
+    const plantFarming = await PlantFarming.findOne({ farmId, seed });
 
-    res.status(200).json({ plantCultivates });
+    res.status(200).json({ plantFarming });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });

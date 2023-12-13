@@ -6,6 +6,7 @@ const Role = db.role;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const Farm = require("../models/farm.model");
+const Client = require("../models/client.model");
 
 exports.signup = (req, res) => {
   const user = new User({
@@ -22,13 +23,24 @@ exports.signup = (req, res) => {
             return user.save();
           })
           .then(() => {
-            console.log("user: ", user)
-            const farm = new Farm({
-              farmID: user._id,
-              email: user.email,
-            });
-            farm.save()
-            res.send({ message: "User was registered successfully!" });
+            console.log("user: ", user, req.body.roles)
+            if(req.body.roles[0] === 'farm'){
+              const farm = new Farm({
+                farmID: user._id,
+                email: user.email,
+              });
+              farm.save()
+              res.send({ message: "User was registered successfully!" });
+            } else if(req.body.roles[0] === 'client'){
+              console.log("here: ")
+              const client = new Client({
+                clientId: user._id,
+                email: user.email,
+              });
+              console.log("client: ", client)
+              client.save()
+              res.send({ message: "User was registered successfully!" });
+            }
           })
           .catch(err => {
             res.status(500).send({ message: err });

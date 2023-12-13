@@ -1,7 +1,7 @@
 module.exports = {
-  HOST: "35.198.209.247",
+  HOST: "34.142.236.121",
   PORT: 27017,
-  DB: "Agritech",
+  DB: "Agritech-update",
   USERNAME: "admin",
   PASSWORD: "huyhuyhuy"
 };

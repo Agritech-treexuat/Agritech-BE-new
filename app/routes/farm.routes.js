@@ -12,7 +12,7 @@ module.exports = function(app) {
 
   app.post(
     "/farm/initProject",
-    [authJwt.verifyToken, authJwt.isFarm],
+    [authJwt.verifyToken, authJwt.isFarm, controller.upload],
     controller.initProject
   );
 
@@ -21,10 +21,10 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isFarm],
     controller.addProcessToProject);
 
-  app.post(
-    "/farm/project/addImage/:projectId",
-    [authJwt.verifyToken, authJwt.isFarm],
-    controller.addImageToProject);
+  // app.post(
+  //   "/farm/project/addImage/:projectId",
+  //   [authJwt.verifyToken, authJwt.isFarm],
+  //   controller.addImageToProject);
 
   app.post(
     "/farm/project/addOutput/:projectId",
@@ -118,6 +118,8 @@ module.exports = function(app) {
     controller.getPlantsFarm);
 
   app.get("/farm/me", [authJwt.verifyToken], controller.getMyProfile);
+
+  app.post("/upload", controller.upload)
 
 
 };

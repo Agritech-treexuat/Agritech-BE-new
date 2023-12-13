@@ -2,16 +2,88 @@
 const Farm = require('../models/farm.model');
 const Project = require('../models/project.model');
 const {mongoose} = require('mongoose')
-
+const uuidv4 = require('uuid').v4;
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const QR = require('../models/qr.model');
-const PlantCultivate = require('../models/plantCultivate.model')
+const PlantFarming = require('../models/plantFarming.model')
 const Plant = require('../models/plant.model')
-const Cultivative = require('../models/cultivative.model')
+const Image = require('../models/image.model')
+const AgroChemicals = require('../models/agroChemical.model')
+
+const processFile = require("../middlewares/upload");
+const { format } = require("util");
+const { Storage } = require("@google-cloud/storage");
+// Instantiate a storage client with credentials
+const storage = new Storage({ keyFilename: "google-cloud-key.json" });
+const bucket = storage.bucket("agritech-data");
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
+
+const uploadFile = (f, res) => {
+  return new Promise((resolve, reject) => {
+    const { originalname, buffer } = f;
+    var filename = originalname.toLowerCase().split(" ").join("-");
+    const timestamp = Date.now();
+    const randomSuffix = uuidv4().split('-').join('');
+    filename = `${timestamp}_${randomSuffix}_${filename}`;
+
+    console.log(filename);
+
+    const blob = bucket.file(filename);
+
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+    });
+
+    blobStream.on("error", (err) => {
+      res.status(500).send({ message: err.message });
+      reject(err);
+    });
+
+    blobStream.on("finish", async (data) => {
+      const publicUrl = format(
+        `https://storage.googleapis.com/${bucket.name}/${blob.name}`
+      );
+
+      try {
+        await bucket.file(filename).makePublic();
+        resolve(publicUrl);
+      } catch (err) {
+        console.log("failed to make it public");
+        reject(err);
+      }
+    });
+
+    blobStream.end(buffer);
+  });
+};
+
+exports.upload = async (req, res, next) => {
+  const urlList = [];
+  console.log("Req: ", req.body)
+  await processFile(req, res); //multer
+  console.log("Passed: ", req.files)
+
+  for (var i = 0; i < req.files.length; i++) {
+    if (!req.files[i]) {
+      return res.status(400).send({ message: "Please upload a file!" });
+    }
+
+    const publicUrl = await uploadFile(req.files[i], res);
+    urlList.push(publicUrl);
+  }
+
+  console.log("url: ", urlList)
+
+  req.urlList = urlList;
+  next()
+
+  // return res.status(200).send({
+  //   message: "Uploaded the files successfully"
+  // });
+};
 
 // API để lấy thông tin cá nhân của người dùng hiện tại
 exports.getMyProfile = async (req, res) => {
@@ -46,14 +118,20 @@ exports.getMyProfile = async (req, res) => {
 // Hành động khởi tạo một project
 // Xử lý yêu cầu khởi tạo project từ farm
 exports.initProject = async (req, res) => {
-  // console.log("Req: ", req)
-  // Nếu yêu cầu đã được kiểm tra và có đủ quyền (qua middleware)
-  // Bạn có thể tiến hành tạo project
   try {
     // Lấy dữ liệu từ yêu cầu
     const farmID = req.userId;
-    const { input, name } = req.body;
+    const { name, tx, initDate, seed, amount  } = req.body;
+    const urlList = req.urlList
     const contractID = req.body.contractID || null;
+
+    const input = {
+      tx,
+      initDate,
+      seed,
+      amount,
+      images: urlList
+    }
 
     // Tìm farm dựa trên farmID
     const farm = await Farm.find({ _id: new mongoose.Types.ObjectId(farmID) });
@@ -78,6 +156,10 @@ exports.initProject = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
+
+  // console.log("req now: ", req.body)
+  // console.log("req now 2: ", req.files)
+  // return res.status(201).json({ message: 'Project created successfully'});
 };
 
 // Xu ly yeu cau them projct tu farm
@@ -94,26 +176,6 @@ exports.addProcessToProject = async (req, res) => {
     project.process.push(processData);
     const updatedProject = await project.save();
     return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process});
-  }
-  catch(error) {
-    console.error(error);
-    res.status(500).send({ message: error });
-  };
-};
-
-exports.addImageToProject = async (req, res) => {
-  try {
-    const farmID = req.userId; // Lấy farmID từ thông tin người dùng đã xác thực
-    const projectId = req.params.projectId; // Lấy projectId từ tham số của tuyến đường
-    const imageData = req.body;
-    const project = await Project.findOne({ _id: new mongoose.Types.ObjectId(projectId), farmID: farmID })
-    if (!project) {
-      return res.status(403).send({ message: "Farm does not have access to this project." });
-    }
-    // Thêm quy trình vào dự án
-    project.image.push(imageData);
-    const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add image to project successfully', updatedProject: updatedProject});
   }
   catch(error) {
     console.error(error);
@@ -247,11 +309,16 @@ exports.getImages = async (req, res) => {
       return res.status(404).json({ message: "Project not found." });
     }
 
-    let images = project.image;
+    const cameraId = req.params.cameraId ? req.params.cameraId : project.cameraId[0];
+    let images = await Image.findOne({ cameraId: cameraId }); // Lấy thông tin dự án
+    if (!images) {
+      return res.status(404).json({ message: "Camera not found." });
+    }
+    // let cameraId = project.cameraId
 
     if (searchDate) {
-      images = project.image.filter(image => {
-        return image.time >= searchDate && image.time < nextDate;
+      images = images.filter(image => {
+        return image.date >= searchDate && image.date < nextDate;
       });
     }
 
@@ -314,8 +381,8 @@ exports.getExpects = async (req, res) => {
     let expects = project.expect;
 
     if (searchDate) {
-      expects = project.expect.filter(output => {
-        return output.time >= searchDate && output.time < nextDate;
+      expects = project.expect.filter(expect => {
+        return expect.time >= searchDate && expect.time < nextDate;
       });
     }
 
@@ -416,7 +483,7 @@ exports.editProcess = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     process.historyProcess.push({
       ...previousProcessData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -463,7 +530,7 @@ exports.editOutput = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     output.historyOutput.push({
       ...previousOutputData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -510,7 +577,7 @@ exports.editExpect = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     expect.historyExpect.push({
       ...previousExpectData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -552,7 +619,7 @@ exports.editInput = async (req, res) => {
     // Lưu lịch sử chỉnh sửa
     input.historyInput.push({
       ...previousInputData,
-      modified_at: new Date(),
+      modifiedAt: new Date(),
     });
 
     // Lưu lại dự án với thông tin cập nhật
@@ -583,10 +650,10 @@ exports.exportQR = async (req, res) => {
       return res.status(404).json({ message: "Output not found." });
     }
 
-    const { amount, amount_perOne, npp } = output;
+    const { amount, amountPerOne, npp } = output;
 
     // Tính số lượng sản phẩm
-    const a = Math.floor(amount / amount_perOne);
+    const a = Math.floor(amount / amountPerOne);
 
     // Lưu trữ danh sách QR codes
     const qrCodes = [];
@@ -726,50 +793,51 @@ exports.getPlantsFarm = async (req, res) => {
 exports.addPlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const {seed, plantId, price, plan } = req.body;
+    const {seed, plantId, price, plan, timeCultivates } = req.body;
 
     if (!seed || !plan) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
-    // Tạo một PlantCultivate mới
-    const newPlantCultivate = new PlantCultivate({ farmId, seed, price, plan, plantId });
+    // Tạo một PlantFarming mới
+    const newPlantCultivate = new PlantFarming({ farmId, seed, price, plan, plantId, timeCultivates });
 
-    // Lưu PlantCultivate vào cơ sở dữ liệu
+    // Lưu PlantFarming vào cơ sở dữ liệu
     const savedPlantCultivate = await newPlantCultivate.save();
 
-    res.status(201).json({ message: 'PlantCultivate đã được thêm', plantCultivate: savedPlantCultivate });
+    res.status(201).json({ message: 'PlantFarming đã được thêm', plantCultivate: savedPlantCultivate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
   }
 };
 
-// API endpoint để cập nhật thông tin của một PlantCultivate
+// API endpoint để cập nhật thông tin của một PlantFarming
 exports.updatePlantCultivate = async (req, res) => {
   try {
     const farmId = req.userId;
-    const { plantCultivateId, price, plan } = req.body;
+    const { plantCultivateId, price, plan, timeCultivates } = req.body;
 
-    if (!plantCultivateId || !plan) {
+    if (!plantCultivateId) {
       return res.status(400).json({ message: 'Thông tin bị thiếu' });
     }
 
-    // Kiểm tra xem PlantCultivate có tồn tại không
-    const existingPlantCultivate = await PlantCultivate.findOne({ _id: plantCultivateId, farmId });
+    // Kiểm tra xem PlantFarming có tồn tại không
+    const existingPlantCultivate = await PlantFarming.findOne({ _id: plantCultivateId, farmId });
 
     if (!existingPlantCultivate) {
-      return res.status(404).json({ message: 'PlantCultivate không tồn tại hoặc không thuộc sở hữu của bạn' });
+      return res.status(404).json({ message: 'PlantFarming không tồn tại hoặc không thuộc sở hữu của bạn' });
     }
 
-    // Cập nhật thông tin của PlantCultivate
+    // Cập nhật thông tin của PlantFarming
     existingPlantCultivate.price = price;
     existingPlantCultivate.plan = plan;
+    existingPlantCultivate.timeCultivates = timeCultivates;
 
-    // Lưu PlantCultivate đã cập nhật vào cơ sở dữ liệu
+    // Lưu PlantFarming đã cập nhật vào cơ sở dữ liệu
     const updatedPlantCultivate = await existingPlantCultivate.save();
 
-    res.status(200).json({ message: 'PlantCultivate đã được cập nhật', plantCultivate: updatedPlantCultivate });
+    res.status(200).json({ message: 'PlantFarming đã được cập nhật', plantFarming: updatedPlantCultivate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
@@ -839,20 +907,19 @@ exports.getPlanInFarmFromPlantId = async (req, res) => {
   try {
     const { farmId, plantId } = req.params;
 
-    // Tìm tất cả các plantCultivates dựa trên farmId và plantId
-    const plantCultivates = await PlantCultivate.find({ farmId, plantId });
+    // Tìm tất cả các plantFarming dựa trên farmId và plantId
+    const plantFarming = await PlantFarming.find({ farmId, plantId });
 
-    if (!plantCultivates || plantCultivates.length === 0) {
-      return res.status(404).json({ message: 'PlantCultivates not found' });
+    if (!plantFarming || plantFarming.length === 0) {
+      return res.status(404).json({ message: 'plantFarming not found' });
     }
 
-    res.status(200).json({ plantCultivates });
+    res.status(200).json({ plantFarming });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 // API endpoint để lấy thông tin kế hoạch từ seed
 exports.getPlanInFarmFromSeed = async (req, res) => {
@@ -860,14 +927,14 @@ exports.getPlanInFarmFromSeed = async (req, res) => {
     const { seed, farmId } = req.params;
 
     // Tìm thông tin cây trồng dựa trên seed
-    const plantCultivate = await PlantCultivate.find({ seed, farmId });
+    const plantFarming = await PlantFarming.find({ seed, farmId });
 
-    if (!plantCultivate) {
+    if (!plantFarming) {
       return res.status(404).json({ message: 'Plant not found' });
     }
 
     // Trả về thông tin kế hoạch của cây trồng
-    res.status(200).json({ plan: plantCultivate.plan });
+    res.status(200).json({ plan: plantFarming.plan });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
