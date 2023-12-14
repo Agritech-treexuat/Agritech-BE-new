@@ -132,3 +132,46 @@ exports.updateGardenStatus = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+exports.getGardenByGardenId = async (req, res) => {
+  try {
+    const { farmId, gardenId } = req.params;
+
+    // Lấy thông tin của các garden từ farmId
+    const gardens = await Garden.find({ _id: new mongoose.Types.ObjectId(gardenId), farmId: farmId });
+
+    // Lấy thông tin của template cho mỗi garden
+    const gardensWithTemplate = await Promise.all(
+      gardens.map(async (garden) => {
+        const template = await ServiceTemplate.findById(garden.templateId);
+        return { ...garden.toObject(), template };
+      })
+    );
+
+    // Lấy thông tin của client cho mỗi garden
+    const gardensWithClient = await Promise.all(
+      gardensWithTemplate.map(async (garden) => {
+        const client = await Client.findOne({ clientId: garden.clientId });
+        return { ...garden, client };
+      })
+    );
+
+    // Lấy thông tin của serviceRequest cho mỗi garden
+    const gardensWithServiceRequest = await Promise.all(
+      gardensWithClient.map(async (garden) => {
+        const serviceRequest = await ServiceRequest.findById(garden.serviceRequestId);
+        // Lấy thông tin của các cây herb, leafy, root từ plantId
+        const herbList = await Plant.find({ _id: { $in: serviceRequest.herbListPlantId } });
+        const leafyList = await Plant.find({ _id: { $in: serviceRequest.leafyListPlantId } });
+        const rootList = await Plant.find({ _id: { $in: serviceRequest.herbListPlantId } });
+        return { ...garden, serviceRequest, herbList, leafyList, rootList };
+      })
+    );
+
+
+    res.status(200).json({ garden: gardensWithServiceRequest[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
+  }
+};
