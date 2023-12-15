@@ -623,7 +623,7 @@ exports.editInput = async (req, res) => {
     // Lưu lại dự án với thông tin cập nhật
     await project.save();
 
-    res.status(200).json({ message: "Input updated successfully", updatedInput: input });
+    res.status(200).json({ message: "Input updated successfully", updatedInput: input, projectId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
