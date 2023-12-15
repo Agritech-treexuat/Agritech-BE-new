@@ -37,6 +37,50 @@ exports.initProjectGarden = async (farmId, names) => {
   }
 }
 
+exports.createProjectGarden = async (req, res) => {
+  try {
+    // Lấy dữ liệu từ yêu cầu
+    const { userId } = req;
+    const { gardenId } = req.params;
+    const { name, initDate, seed, amount } = req.body;
+
+    const input = {
+      initDate,
+      seed,
+      amount,
+    };
+
+    // Tìm garden dựa trên gardenId và kiểm tra xem có sở hữu bởi farm có userId không
+    const garden = await Garden.findOne({ _id: gardenId, farmId: userId });
+
+    if (!garden) {
+      return res.status(404).json({ message: 'Garden not found or not owned by the farm' });
+    }
+
+    // Tạo một project với thông tin từ yêu cầu
+    const project = new Project({
+      farmID: userId,
+      name,
+      input,
+    });
+
+    // Lưu project vào cơ sở dữ liệu
+    const savedProject = await project.save();
+
+    // Cập nhật mảng projectId của garden
+    garden.projectId.push(savedProject._id);
+    await garden.save();
+
+    // Tìm thông tin cây trồng dựa trên tên cây
+    const plant = await Plant.findOne({ name });
+
+    return res.status(201).json({ message: 'Project created successfully', project: savedProject, plantImage: plant?.image });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
 exports.createGarden = async (farmId, clientId, projectIds, note, templateId, serviceRequestId) => {
   try {
     const farmID = farmId

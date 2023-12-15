@@ -20,6 +20,7 @@ const bucket = storage.bucket("agritech-data");
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
+const Garden = require('../models/garden.model');
 
 const uploadFile = (f, res) => {
   return new Promise((resolve, reject) => {
