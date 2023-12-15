@@ -13,4 +13,5 @@ module.exports = function(app) {
   app.get('/garden/:farmId', controller.getGardensByFarmId);
   app.get('/garden/:farmId/:gardenId', controller.getGardenByGardenId);
   app.patch('/updateGardenStatus/:gardenId', [authJwt.verifyToken, authJwt.isFarm], controller.updateGardenStatus);
+  app.get('/projects/:gardenId', controller.getProjectsByGardenId);
 };

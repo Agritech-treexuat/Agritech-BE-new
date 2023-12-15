@@ -175,3 +175,45 @@ exports.getGardenByGardenId = async (req, res) => {
     res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
   }
 };
+
+exports.getProjectsByGardenId = async (req, res) => {
+  try {
+    const { gardenId } = req.params;
+
+    // Tìm garden dựa trên gardenId
+    const garden = await Garden.findOne({ _id: gardenId });
+
+    if (!garden) {
+      return res.status(404).json({ message: 'Garden not found' });
+    }
+
+    // Lấy danh sách các project từ projectId trong garden
+    const projects = await Project.find({ _id: { $in: garden.projectId } });
+
+    // Tạo một mảng kết quả chứa tên, input và ảnh của mỗi project
+    const result = [];
+
+    for (const project of projects) {
+      // Tìm plant dựa trên plantName của project
+      const plant = await Plant.findOne({ name: project.name });
+
+      if (!plant) {
+        console.warn(`Plant not found for project ${project.name}`);
+        continue;
+      }
+
+      // Thêm thông tin vào kết quả
+      result.push({
+        projectId: project._id,
+        name: project.name,
+        input: project.input,
+        plantImage: plant.image, // Giả sử có trường image trong Plant model
+      });
+    }
+
+    res.status(200).json({ projects: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
