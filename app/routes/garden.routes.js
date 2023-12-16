@@ -15,9 +15,11 @@ module.exports = function(app) {
   app.patch('/updateGardenStatus/:gardenId', [authJwt.verifyToken, authJwt.isFarm], controller.updateGardenStatus);
   app.get('/projects/:gardenId', controller.getProjectsByGardenId);
   app.get('/gardenPlantFarming/:gardenId', controller.getPlantFarmingByGardenId);
+  app.get('/gardenProject/:gardenId', controller.getProjectsProcessAndTemplateByGardenId);
   app.post(
     "/farm/createProjectGarden/:gardenId",
     [authJwt.verifyToken, authJwt.isFarm],
     controller.createProjectGarden
   );
+
 };

@@ -51,6 +51,8 @@ exports.createProjectGarden = async (req, res) => {
       amount,
     };
 
+    console.log("here: ", name, initDate, seed, amount)
+
     // Tìm garden dựa trên gardenId và kiểm tra xem có sở hữu bởi farm có userId không
     const garden = await Garden.findOne({ _id: gardenId, farmId: userId });
 
@@ -58,11 +60,24 @@ exports.createProjectGarden = async (req, res) => {
       return res.status(404).json({ message: 'Garden not found or not owned by the farm' });
     }
 
+
+      // Tìm thông tin cây trồng dựa trên tên cây
+      const plant = await Plant.findOne({ name });
+
+      console.log("plant: ", plant)
+
+      // Lấy plantId của cây
+      const plantId = plant ? plant._id : null;
+
+      // Lấy plantFarming tương ứng với plantId và farmId
+      const plantFarming = plantId ? await PlantFarming.findOne({ plantId: String(plantId), farmId: garden.farmId, seed: seed}) : null;
+
     // Tạo một project với thông tin từ yêu cầu
     const project = new Project({
       farmID: userId,
       name,
       input,
+      plan: plantFarming.plan
     });
 
     // Lưu project vào cơ sở dữ liệu
@@ -71,9 +86,6 @@ exports.createProjectGarden = async (req, res) => {
     // Cập nhật mảng projectId của garden
     garden.projectId.push(savedProject._id);
     await garden.save();
-
-    // Tìm thông tin cây trồng dựa trên tên cây
-    const plant = await Plant.findOne({ name });
 
     return res.status(201).json({ message: 'Project created successfully', project: savedProject, plantImage: plant?.image });
   } catch (error) {
@@ -346,3 +358,49 @@ exports.getPlantFarmingByGardenId = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+
+
+exports.getProjectsProcessAndTemplateByGardenId = async (req, res) => {
+  try {
+    const { gardenId } = req.params;
+
+    // Tìm garden dựa trên gardenId
+    const garden = await Garden.findOne({ _id: gardenId });
+
+    if (!garden) {
+      return res.status(404).json({ message: 'Garden not found' });
+    }
+
+    // Lấy danh sách các project từ projectId trong garden
+    const projects = await Project.find({ _id: { $in: garden.projectId } });
+
+    // Tạo một mảng kết quả chứa tên, input và ảnh của mỗi project
+    const result = [];
+
+    for (const project of projects) {
+      // Tìm plant dựa trên plantName của project
+      const plant = await Plant.findOne({ name: project.name });
+
+      if (!plant) {
+        console.warn(`Plant not found for project ${project.name}`);
+        continue;
+      }
+
+      // Thêm thông tin vào kết quả
+      result.push({
+        projectId: project._id,
+        name: project.name,
+        input: project.input,
+        process: project.process,
+        plan: project.plan,
+        status: project.status,
+        plantImage: plant.image, // Giả sử có trường image trong Plant model
+      });
+    }
+
+    res.status(200).json({ projects: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
