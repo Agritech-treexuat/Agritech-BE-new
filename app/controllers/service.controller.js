@@ -4,7 +4,7 @@ const ServiceRequest = require('../models/serviceRequest.model');
 const Farm = require('../models/farm.model');
 const Plant = require('../models/plant.model');
 const Client = require('../models/client.model');
-const { initProjectGarden, createGarden } = require('./garden.controller');
+const { initProjectGarden, createGarden, makePlantFarmingAndSeedByGardenId } = require('./garden.controller');
 
 exports.getAllServiceTemplates = async (req, res) => {
   try {
@@ -203,7 +203,9 @@ exports.updateServiceRequestStatus = async (req, res) => {
     if(status === 'accepted' && old_status != 'accepted') {
       getPlantNames(updatedServiceRequest.herbListPlantId, updatedServiceRequest.leafyListPlantId, updatedServiceRequest.rootListPlantId).then(
         names => initProjectGarden(farmId, names).then(
-          projectIds => createGarden(farmId, updatedServiceRequest.clientId, projectIds, updatedServiceRequest.note, updatedServiceRequest.serviceTemplateId, updatedServiceRequest._id)
+          projectIds => createGarden(farmId, updatedServiceRequest.clientId, projectIds, updatedServiceRequest.note, updatedServiceRequest.serviceTemplateId, updatedServiceRequest._id).then(
+            garden => makePlantFarmingAndSeedByGardenId(garden._id)
+          )
         )
       )
       // const garden = createGarden(farmId, updatedServiceRequest.clientId, projectIds, updatedServiceRequest.note, updatedServiceRequest.serviceTemplateId, updatedServiceRequest._id)

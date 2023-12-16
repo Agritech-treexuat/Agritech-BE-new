@@ -6,6 +6,7 @@ const Plant = require('../models/plant.model');
 const Client = require('../models/client.model');
 const Project = require('../models/project.model');
 const Garden = require('../models/garden.model');
+const PlantFarming = require('../models/plantFarming.model');
 
 exports.initProjectGarden = async (farmId, names) => {
   try {
@@ -261,3 +262,87 @@ exports.getProjectsByGardenId = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+exports.makePlantFarmingAndSeedByGardenId = async (gardenId) => {
+  try {
+    // Tìm garden dựa trên gardenId
+    const garden = await Garden.findById(gardenId);
+
+    if (!garden) {
+      throw new Error('Not found garden')
+    }
+
+    // Lấy danh sách projectId từ garden
+    const projectIds = garden.projectId;
+
+    // Lấy thông tin của các project
+    const projects = await Project.find({ _id: { $in: projectIds } });
+    // Lấy danh sách tên của các project từ projectId
+    const plantNames = await Project.find({ _id: { $in: projectIds } }, 'name');
+
+    // Lấy thông tin của các cây (Plant) từ tên của các cây
+    const plants = await Plant.find({ name: { $in: plantNames } });
+
+    // Lấy plantId của các cây
+    const plantIds = plants.map((plant) => plant._id);
+
+    // Cập nhật kế hoạch cho từng project
+    const newProjects = projects.map(async (project) => {
+      // Lấy thông tin cây (Plant) tương ứng với tên của project
+      const plant = await Plant.findOne({name: project.name});
+      console.log('project name: ', project.name)
+
+      // Lấy plantId của cây
+      const plantId = plant ? plant._id : null;
+      console.log("plant: ", plant)
+
+      // Lấy plantFarming tương ứng với plantId và farmId
+      const plantFarming = plantId ? await PlantFarming.findOne({ plantId: String(plantId), farmId: garden.farmId, isDefault: true }) : null;
+      console.log("plantFarming: ", plantFarming)
+
+      // Nếu có plantFarming, cập nhật plan trong project
+      if (plantFarming) {
+        project.plan = plantFarming.plan
+        project.input.seed = plantFarming.seed
+        const updatedProject =  await project.save()
+        return updatedProject
+      }
+      else return null
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+exports.getPlantFarmingByGardenId = async (req, res) => {
+  try {
+    const { gardenId } = req.params;
+
+    // Tìm garden theo gardenId
+    const garden = await Garden.findById(gardenId);
+
+    // Kiểm tra xem garden có tồn tại không
+    if (!garden) {
+      return res.status(404).json({ message: 'Garden not found' });
+    }
+
+    // Lấy danh sách projectId từ garden
+    const projectIds = garden.projectId;
+
+    // Tìm các project có projectId nằm trong danh sách projectIds
+    const projects = await Project.find({ _id: { $in: projectIds } });
+
+    // Chuẩn bị dữ liệu trả về
+    const responseData = projects.map((project) => ({
+      projectId: project._id,
+      input: project.input,
+      name: project.name,
+      plan: project.plan,
+    }));
+
+    res.status(200).json({ projects: responseData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}

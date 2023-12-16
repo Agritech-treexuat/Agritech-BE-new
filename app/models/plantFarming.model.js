@@ -23,7 +23,8 @@ const plantFarmingSchema = new mongoose.Schema({
   seed: String,
   price: Number,
   plan: [plan],
-  timeCultivates: [timeCultivate]
+  timeCultivates: [timeCultivate],
+  isDefault: Boolean
 });
 
 const PlantFarming = mongoose.model('PlantFarming', plantFarmingSchema);
