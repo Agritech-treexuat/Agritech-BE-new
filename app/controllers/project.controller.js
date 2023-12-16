@@ -174,7 +174,7 @@ exports.addProcessToProject = async (req, res) => {
     // Thêm quy trình vào dự án
     project.process.push(processData);
     const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process});
+    return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process, projectId: updatedProject._id});
   }
   catch(error) {
     console.error(error);
