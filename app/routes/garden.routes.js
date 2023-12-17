@@ -22,4 +22,32 @@ module.exports = function(app) {
     controller.createProjectGarden
   );
 
+  app.post(
+    "/clientRequests/:gardenId",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.addClientRequest
+  );
+
+  app.get(
+    "/clientRequests/:gardenId",
+    controller.getClientRequest
+  );
+
+  app.post(
+    "/addDelivery/:gardenId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.addDelivery
+  );
+
+  app.get(
+    "/delivery/:gardenId",
+    controller.getDelivery
+  );
+
+  app.post(
+    "/updateDeliveryStatus/:gardenId/:deliveryId",
+    [authJwt.verifyToken, authJwt.isFarm],
+    controller.updateStatusDelivery
+  );
+
 };

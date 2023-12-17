@@ -404,3 +404,130 @@ exports.getProjectsProcessAndTemplateByGardenId = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+exports.addClientRequest = async (req, res) => {
+  const { gardenId } = req.params;
+  const clientId  = req.userId;
+  console.log(clientId)
+
+  try {
+    // Kiểm tra xem garden có tồn tại hay không
+    const existingGarden = await Garden.findOne({ _id: gardenId, clientId: clientId });
+
+    if (!existingGarden) {
+      return res.status(404).json({ error: 'Garden not found or does not belong to the client.' });
+    }
+
+    // Giả sử dữ liệu clientRequest đến từ body request
+    const clientRequest = req.body;
+
+    // Thêm clientRequest vào danh sách clientRequests trong Garden
+    existingGarden.clientRequests.push(clientRequest);
+
+    // Lưu trạng thái mới của Garden
+    await existingGarden.save();
+
+    res.status(201).json({ success: true, message: 'ClientRequest added successfully.', updatedClientRequest: existingGarden.clientRequests});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getClientRequest = async (req, res) => {
+  const { gardenId } = req.params;
+
+  try {
+    // Kiểm tra xem garden có tồn tại hay không
+    const existingGarden = await Garden.findOne({ _id: gardenId });
+
+    if (!existingGarden) {
+      return res.status(404).json({ error: 'Garden not found' });
+    }
+
+    // Trả về tất cả các clientRequests của Garden
+    res.status(200).json({ clientRequests: existingGarden.clientRequests });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+exports.addDelivery = async (req, res) => {
+  const farmId = req.userId;
+  const { gardenId } = req.params;
+  const { deliveryDetails, note } = req.body; // Đảm bảo bạn có thể nhận được dữ liệu từ body
+
+  try {
+    // Kiểm tra xem farm có tồn tại hay không
+    const existingFarm = await Garden.findOne({ _id: gardenId, farmId: farmId });
+
+    if (!existingFarm) {
+      return res.status(404).json({ error: 'Garden not found or you can not access' });
+    }
+
+    // Thêm delivery mới vào farm
+    const newDelivery = {
+      date: new Date(),
+      deliveryDetails: deliveryDetails,
+      note,
+      status: 'coming',
+      clientAccept: false,
+      clientNote: '',
+    };
+
+    existingFarm.deliveries.push(newDelivery);
+    await existingFarm.save();
+
+    // Trả về thông tin của delivery mới
+    res.status(201).json({ newDelivery });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+exports.getDelivery = async (req, res) => {
+  const { gardenId } = req.params
+
+  try {
+    // Kiểm tra xem farm có tồn tại hay không
+    const existingFarm = await Garden.findOne({ _id: gardenId });
+
+    if (!existingFarm) {
+      return res.status(404).json({ error: 'Farm not found.' });
+    }
+
+    // Trả về tất cả các deliveries của farm
+    res.status(200).json({ deliveries: existingFarm.deliveries });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+exports.updateStatusDelivery = async (req, res) => {
+  const { userId } = req;
+  const { deliveryId, gardenId } = req.params;
+  const { newStatus } = req.body; // Đảm bảo bạn có thể nhận được dữ liệu từ body
+
+  try {
+    // Kiểm tra xem farm và delivery có tồn tại hay không
+    const existingFarm = await Garden.findOne({ _id: gardenId, farmId: userId });
+    const existingDelivery = existingFarm.deliveries.id(deliveryId);
+
+    if (!existingFarm || !existingDelivery) {
+      return res.status(404).json({ error: 'Farm or delivery not found.' });
+    }
+
+    // Cập nhật trạng thái của delivery
+    existingDelivery.status = newStatus;
+    await existingFarm.save();
+
+    // Trả về thông tin của delivery đã được cập nhật
+    res.status(200).json({ updatedDelivery: existingDelivery });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
