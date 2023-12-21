@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const qrSchema = new mongoose.Schema({
   privateId: String,
@@ -9,8 +9,8 @@ const qrSchema = new mongoose.Schema({
   npp: String,
   txScan: String,
   clientId: String
-});
+})
 
-const QR = mongoose.model('QR', qrSchema);
+const QR = mongoose.model('QR', qrSchema)
 
-module.exports = QR;
+module.exports = QR

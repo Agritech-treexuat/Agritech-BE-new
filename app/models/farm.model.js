@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const farmSchema = new mongoose.Schema({
   id: String,
@@ -14,8 +14,8 @@ const farmSchema = new mongoose.Schema({
   plant: [String],
   district: String,
   cameraId: [String]
-});
+})
 
-const Farm = mongoose.model('Farm', farmSchema);
+const Farm = mongoose.model('Farm', farmSchema)
 
-module.exports = Farm;
+module.exports = Farm

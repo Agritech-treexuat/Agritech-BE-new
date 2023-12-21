@@ -1,56 +1,56 @@
-const db = require("../models");
+const db = require('../models')
 const dbConfig = require('../config/db.config')
-const Role = db.role;
+const Role = db.role
 
 console.log(`mongodb://${dbConfig.USERNAME}:${dbConfig.PASSWORD}@${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`)
 db.mongoose
   .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: "Agritech",
+    dbName: 'Agritech',
     user: dbConfig.USERNAME,
     pass: dbConfig.PASSWORD
   })
   .then(() => {
-    console.log("Successfully connect to MongoDB.");
-    initial();
+    console.log('Successfully connect to MongoDB.')
+    initial()
   })
-  .catch(err => {
-    console.error("Connection error", err);
-    process.exit();
-  });
+  .catch((err) => {
+    console.error('Connection error', err)
+    process.exit()
+  })
 
 function initial() {
   Role.estimatedDocumentCount()
-    .then(count => {
+    .then((count) => {
       if (count === 0) {
         const userRole = new Role({
-          name: "farm"
-        });
+          name: 'farm'
+        })
 
         const clientRole = new Role({
-          name: "client"
-        });
+          name: 'client'
+        })
 
         const adminRole = new Role({
-          name: "admin"
-        });
+          name: 'admin'
+        })
 
-        return Promise.all([userRole.save(), clientRole.save(), adminRole.save()]);
+        return Promise.all([userRole.save(), clientRole.save(), adminRole.save()])
       }
     })
-    .then(savedRoles => {
+    .then((savedRoles) => {
       if (savedRoles) {
-        savedRoles.forEach(savedRole => {
-          console.log(`added '${savedRole.name}' to roles collection`);
-        });
+        savedRoles.forEach((savedRole) => {
+          console.log(`added '${savedRole.name}' to roles collection`)
+        })
       }
     })
-    .catch(err => {
-      console.error("Error when counting documents or saving roles", err);
-    });
+    .catch((err) => {
+      console.error('Error when counting documents or saving roles', err)
+    })
 }
 
 module.exports = {
   db
-};
+}

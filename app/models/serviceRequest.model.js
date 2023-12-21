@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+const mongoose = require('mongoose')
 
 const serviceRequestSchema = new mongoose.Schema({
   date: Date,
@@ -15,8 +14,8 @@ const serviceRequestSchema = new mongoose.Schema({
     enum: ['accepted', 'rejected', 'waiting'],
     defailt: 'waiting'
   }
-});
+})
 
-const ServiceRequest = mongoose.model('ServiceRequest', serviceRequestSchema);
+const ServiceRequest = mongoose.model('ServiceRequest', serviceRequestSchema)
 
-module.exports = ServiceRequest;
+module.exports = ServiceRequest

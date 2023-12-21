@@ -1,24 +1,24 @@
-const db = require("../models");
-const ROLES = db.ROLES;
-const User = db.user;
+const db = require('../models')
+const ROLES = db.ROLES
+const User = db.user
 
 const checkDuplicateEmail = (req, res, next) => {
   // Kiểm tra xem email đã tồn tại chưa
   User.findOne({
     email: req.body.email
   })
-    .then(user => {
+    .then((user) => {
       if (user) {
-        res.status(400).send({ message: "Failed! Email is already in use!" });
-        return;
+        res.status(400).send({ message: 'Failed! Email is already in use!' })
+        return
       }
 
-      next();
+      next()
     })
-    .catch(err => {
-      res.status(500).send({ message: err });
-    });
-};
+    .catch((err) => {
+      res.status(500).send({ message: err })
+    })
+}
 
 checkRolesExisted = (req, res, next) => {
   if (req.body.roles) {
@@ -26,18 +26,18 @@ checkRolesExisted = (req, res, next) => {
       if (!ROLES.includes(req.body.roles[i])) {
         res.status(400).send({
           message: `Failed! Role ${req.body.roles[i]} does not exist!`
-        });
-        return;
+        })
+        return
       }
     }
   }
 
-  next();
-};
+  next()
+}
 
 const verifySignUp = {
   checkDuplicateEmail,
   checkRolesExisted
-};
+}
 
-module.exports = verifySignUp;
+module.exports = verifySignUp
