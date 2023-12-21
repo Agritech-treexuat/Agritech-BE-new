@@ -51,8 +51,6 @@ exports.createProjectGarden = async (req, res) => {
       amount
     }
 
-    console.log('here: ', name, initDate, seed, amount)
-
     // Tìm garden dựa trên gardenId và kiểm tra xem có sở hữu bởi farm có userId không
     const garden = await Garden.findOne({ _id: gardenId, farmId: userId })
 
@@ -62,8 +60,6 @@ exports.createProjectGarden = async (req, res) => {
 
     // Tìm thông tin cây trồng dựa trên tên cây
     const plant = await Plant.findOne({ name })
-
-    console.log('plant: ', plant)
 
     // Lấy plantId của cây
     const plantId = plant ? plant._id : null
@@ -304,17 +300,14 @@ exports.makePlantFarmingAndSeedByGardenId = async (gardenId) => {
     const newProjects = projects.map(async (project) => {
       // Lấy thông tin cây (Plant) tương ứng với tên của project
       const plant = await Plant.findOne({ name: project.name })
-      console.log('project name: ', project.name)
 
       // Lấy plantId của cây
       const plantId = plant ? plant._id : null
-      console.log('plant: ', plant)
 
       // Lấy plantFarming tương ứng với plantId và farmId
       const plantFarming = plantId
         ? await PlantFarming.findOne({ plantId: String(plantId), farmId: garden.farmId, isDefault: true })
         : null
-      console.log('plantFarming: ', plantFarming)
 
       // Nếu có plantFarming, cập nhật plan trong project
       if (plantFarming) {
@@ -410,7 +403,6 @@ exports.getProjectsProcessAndTemplateByGardenId = async (req, res) => {
 exports.addClientRequest = async (req, res) => {
   const { gardenId } = req.params
   const clientId = req.userId
-  console.log(clientId)
 
   try {
     // Kiểm tra xem garden có tồn tại hay không

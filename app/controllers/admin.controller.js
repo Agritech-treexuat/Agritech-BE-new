@@ -46,7 +46,6 @@ exports.getMyProfile = async (req, res) => {
 // Hành động khởi tạo một project
 // Xử lý yêu cầu khởi tạo project từ farm
 exports.initProject = async (req, res) => {
-  // console.log("Req: ", req)
   // Nếu yêu cầu đã được kiểm tra và có đủ quyền (qua middleware)
   // Bạn có thể tiến hành tạo project
   try {

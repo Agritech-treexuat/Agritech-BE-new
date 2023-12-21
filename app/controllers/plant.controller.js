@@ -26,14 +26,11 @@ exports.addPlant = async (req, res) => {
     if (!plantId) {
       return res.status(400).json({ message: 'Tên cây là bắt buộc' })
     }
-    console.log('farm id: ', farmID)
 
     const farm = await Farm.findOne({ farmID })
     if (!farm) {
       return res.status(400).json({ message: 'Khong co farm' })
     }
-
-    console.log('farm: ', farm)
 
     // Kiểm tra xem cây với tên đã tồn tại trong cơ sở dữ liệu chưa
     const existingPlant = await farm.plant.includes(plantId)

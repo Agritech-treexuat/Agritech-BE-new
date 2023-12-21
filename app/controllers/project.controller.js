@@ -30,8 +30,6 @@ const uploadFile = (f, res) => {
     const randomSuffix = uuidv4().split('-').join('')
     filename = `${timestamp}_${randomSuffix}_${filename}`
 
-    console.log(filename)
-
     const blob = bucket.file(filename)
 
     const blobStream = blob.createWriteStream({
@@ -61,9 +59,7 @@ const uploadFile = (f, res) => {
 
 exports.upload = async (req, res, next) => {
   const urlList = []
-  console.log('Req: ', req.body)
   await processFile(req, res) //multer
-  console.log('Passed: ', req.files)
 
   for (var i = 0; i < req.files.length; i++) {
     if (!req.files[i]) {
@@ -73,8 +69,6 @@ exports.upload = async (req, res, next) => {
     const publicUrl = await uploadFile(req.files[i], res)
     urlList.push(publicUrl)
   }
-
-  console.log('url: ', urlList)
 
   req.urlList = urlList
   next()
@@ -153,10 +147,6 @@ exports.initProject = async (req, res) => {
     console.error(error)
     return res.status(500).json({ message: 'Internal Server Error' })
   }
-
-  // console.log("req now: ", req.body)
-  // console.log("req now 2: ", req.files)
-  // return res.status(201).json({ message: 'Project created successfully'});
 }
 
 // Xu ly yeu cau them projct tu farm

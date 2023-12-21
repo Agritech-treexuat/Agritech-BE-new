@@ -250,7 +250,6 @@ async function getPlantNames(herbListPlantId, leafyListPlantId, rootListPlantId)
 
     // Lấy danh sách tên từ kết quả trả về
     const plantNames = plants.map((plant) => plant.name)
-    console.log('plant: ', plantNames)
 
     return plantNames
   } catch (error) {

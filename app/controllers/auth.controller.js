@@ -24,7 +24,6 @@ exports.signup = (req, res) => {
             return user.save()
           })
           .then(() => {
-            console.log('user: ', user, req.body.roles)
             if (req.body.roles[0] === 'farm') {
               const farm = new Farm({
                 farmID: user._id,
@@ -33,12 +32,10 @@ exports.signup = (req, res) => {
               farm.save()
               res.send({ message: 'User was registered successfully!' })
             } else if (req.body.roles[0] === 'client') {
-              console.log('here: ')
               const client = new Client({
                 clientId: user._id,
                 email: user.email
               })
-              console.log('client: ', client)
               client.save()
               res.send({ message: 'User was registered successfully!' })
             }
