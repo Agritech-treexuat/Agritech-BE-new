@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const agroChemicalItem = new mongoose.Schema({
   name: String,
-  amountPerHa: Number,
-});
+  amountPerHa: Number
+})
 
 const plan = new mongoose.Schema({
   agroChemicalItems: [agroChemicalItem],
@@ -24,7 +24,7 @@ const historyOutput = new mongoose.Schema({
   images: [String],
   time: Date,
   modifiedAt: Date,
-  npp: [npp],
+  npp: [npp]
 })
 
 const historyProcess = new mongoose.Schema({
@@ -34,7 +34,7 @@ const historyProcess = new mongoose.Schema({
   note: String,
   time: Date,
   modifiedAt: Date
-});
+})
 
 const historyExpect = new mongoose.Schema({
   tx: String,
@@ -42,7 +42,7 @@ const historyExpect = new mongoose.Schema({
   note: String,
   time: Date,
   modifiedAt: Date
-});
+})
 
 const historyInput = new mongoose.Schema({
   tx: String,
@@ -52,8 +52,7 @@ const historyInput = new mongoose.Schema({
   images: [String],
   expect: String,
   modifiedAt: Date
-});
-
+})
 
 const output = new mongoose.Schema({
   tx: String,
@@ -65,7 +64,7 @@ const output = new mongoose.Schema({
   historyOutput: [historyOutput],
   npp: [npp],
   exportQR: Boolean
-});
+})
 
 const process = new mongoose.Schema({
   tx: String,
@@ -75,7 +74,7 @@ const process = new mongoose.Schema({
   note: String,
   isEdited: Boolean,
   historyProcess: [historyProcess]
-});
+})
 
 const expect = new mongoose.Schema({
   tx: String,
@@ -83,8 +82,8 @@ const expect = new mongoose.Schema({
   note: String,
   time: Date,
   isEdited: Boolean,
-  historyExpect: [historyExpect],
-});
+  historyExpect: [historyExpect]
+})
 
 const projectSchema = new mongoose.Schema({
   id: String,
@@ -106,8 +105,8 @@ const projectSchema = new mongoose.Schema({
   output: [output],
   cameraId: [String],
   status: String
-});
+})
 
-const Project = mongoose.model('Project', projectSchema);
+const Project = mongoose.model('Project', projectSchema)
 
-module.exports = Project;
+module.exports = Project

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const timeCultivate = new mongoose.Schema({
   start: Number,
@@ -16,13 +16,13 @@ const plant = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum : ['herb','leafy', 'root'],
+    enum: ['herb', 'leafy', 'root'],
     default: 'leafy'
   },
   farmingTime: Number,
   harvestTime: Number
-});
+})
 
-const Plant = mongoose.model('Plant', plant);
+const Plant = mongoose.model('Plant', plant)
 
-module.exports = Plant;
+module.exports = Plant

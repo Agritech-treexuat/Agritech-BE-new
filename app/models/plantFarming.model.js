@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const agroChemicalItem = mongoose.Schema({
   name: String,
-  amountPerHa: Number,
+  amountPerHa: Number
 })
 
 const timeCultivate = new mongoose.Schema({
@@ -25,8 +25,8 @@ const plantFarmingSchema = new mongoose.Schema({
   plan: [plan],
   timeCultivates: [timeCultivate],
   isDefault: Boolean
-});
+})
 
-const PlantFarming = mongoose.model('PlantFarming', plantFarmingSchema);
+const PlantFarming = mongoose.model('PlantFarming', plantFarmingSchema)
 
-module.exports = PlantFarming;
+module.exports = PlantFarming

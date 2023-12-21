@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+const mongoose = require('mongoose')
 
 const serviceTemplateSchema = new mongoose.Schema({
   farmId: String,
@@ -11,8 +10,8 @@ const serviceTemplateSchema = new mongoose.Schema({
   herbMax: Number,
   leafyMax: Number,
   rootMax: Number
-});
+})
 
-const ServiceTemplate = mongoose.model('ServiceTemplate', serviceTemplateSchema);
+const ServiceTemplate = mongoose.model('ServiceTemplate', serviceTemplateSchema)
 
-module.exports = ServiceTemplate;
+module.exports = ServiceTemplate
