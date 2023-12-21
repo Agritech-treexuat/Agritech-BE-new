@@ -1,7 +1,8 @@
+require('dotenv').config()
 module.exports = {
-  HOST: '34.142.236.121',
+  HOST: process.env.HOST,
   PORT: 27017,
-  DB: 'Agritech-update',
-  USERNAME: 'admin',
-  PASSWORD: 'huyhuyhuy'
+  DB: process.env.DB,
+  USERNAME: process.env.USERNAME,
+  PASSWORD: process.env.PASSWORD
 }
