@@ -45,6 +45,7 @@ require('./app/routes/farm.routes')(app)
 require('./app/routes/admin.routes')(app)
 require('./app/routes/service.routes')(app)
 require('./app/routes/garden.routes')(app)
+require('./app/routes/plant.routes')(app)
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080
