@@ -4,6 +4,7 @@ const ServiceRequest = require('../models/serviceRequest.model');
 const Farm = require('../models/farm.model');
 const Plant = require('../models/plant.model');
 const Client = require('../models/client.model');
+const { initProjectGarden, createGarden, makePlantFarmingAndSeedByGardenId } = require('./garden.controller');
 
 exports.getAllServiceTemplates = async (req, res) => {
   try {
@@ -186,6 +187,7 @@ exports.updateServiceRequestStatus = async (req, res) => {
 
     // Kiểm tra xem ServiceRequest có tồn tại và thuộc về farmId không
     const existingServiceRequest = await ServiceRequest.findOne({ _id: requestId, farmId: farmId });
+    const old_status = existingServiceRequest.status
 
     if (!existingServiceRequest) {
       return res.status(404).json({ message: 'Service request not found or does not belong to the farm' });
@@ -198,6 +200,17 @@ exports.updateServiceRequestStatus = async (req, res) => {
       { new: true }
     );
 
+    if(status === 'accepted' && old_status != 'accepted') {
+      getPlantNames(updatedServiceRequest.herbListPlantId, updatedServiceRequest.leafyListPlantId, updatedServiceRequest.rootListPlantId).then(
+        names => initProjectGarden(farmId, names).then(
+          projectIds => createGarden(farmId, updatedServiceRequest.clientId, projectIds, updatedServiceRequest.note, updatedServiceRequest.serviceTemplateId, updatedServiceRequest._id).then(
+            garden => makePlantFarmingAndSeedByGardenId(garden._id)
+          )
+        )
+      )
+      // const garden = createGarden(farmId, updatedServiceRequest.clientId, projectIds, updatedServiceRequest.note, updatedServiceRequest.serviceTemplateId, updatedServiceRequest._id)
+    }
+
     // Lấy danh sách các serviceRequests có status là 'waiting'
     const waitingServiceRequests = await ServiceRequest.find({ farmId: farmId, status: 'waiting' });
 
@@ -207,3 +220,22 @@ exports.updateServiceRequestStatus = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+async function getPlantNames(herbListPlantId, leafyListPlantId, rootListPlantId) {
+  try {
+    // Gộp tất cả các ID vào một mảng duy nhất
+    const allPlantIds = [...herbListPlantId, ...leafyListPlantId, ...rootListPlantId];
+
+    // Tìm các cây dựa trên danh sách ID
+    const plants = await Plant.find({ _id: { $in: allPlantIds } });
+
+    // Lấy danh sách tên từ kết quả trả về
+    const plantNames = plants.map(plant => plant.name);
+    console.log("plant: ", plantNames)
+
+    return plantNames;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Lỗi khi lấy danh sách tên cây từ danh sách ID.');
+  }
+}

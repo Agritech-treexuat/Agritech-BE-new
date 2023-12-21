@@ -20,6 +20,7 @@ const bucket = storage.bucket("agritech-data");
 
 // Middleware xác thực JWT
 const authJwt = require('../middlewares/authJwt');
+const Garden = require('../models/garden.model');
 
 const uploadFile = (f, res) => {
   return new Promise((resolve, reject) => {
@@ -123,7 +124,6 @@ exports.initProject = async (req, res) => {
     const farmID = req.userId;
     const { name, tx, initDate, seed, amount  } = req.body;
     const urlList = req.urlList
-    const contractID = req.body.contractID || null;
 
     const input = {
       tx,
@@ -144,7 +144,6 @@ exports.initProject = async (req, res) => {
     const project = new Project({
       farmID,
       name,
-      contractID,
       input
     });
 
@@ -175,7 +174,7 @@ exports.addProcessToProject = async (req, res) => {
     // Thêm quy trình vào dự án
     project.process.push(processData);
     const updatedProject = await project.save();
-    return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process});
+    return res.status(200).json({ message: 'Add process to project successfully', updatedProjectProcess: updatedProject.process, projectId: updatedProject._id});
   }
   catch(error) {
     console.error(error);
@@ -625,7 +624,7 @@ exports.editInput = async (req, res) => {
     // Lưu lại dự án với thông tin cập nhật
     await project.save();
 
-    res.status(200).json({ message: "Input updated successfully", updatedInput: input });
+    res.status(200).json({ message: "Input updated successfully", updatedInput: input, projectId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

@@ -6,7 +6,7 @@ const db = {};
 db.mongoose = mongoose;
 
 db.agroChemical = require("./agroChemical.model");
-db.contract = require("./contract.model");
+db.garden = require("./garden.model");
 db.image = require("./image.model");
 db.plant = require("./plant.model");
 db.project = require("./project.model");
