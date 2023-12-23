@@ -403,8 +403,10 @@ exports.getInput = async (req, res) => {
     // Get the input information from the project
     const input = project.input
 
+    const plant = await Plant.findOne({ name: project.name })
+
     // Return the input data
-    res.status(200).json({ input })
+    res.status(200).json({ input: { ...input, plantId: plant._id } })
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Internal server error' })

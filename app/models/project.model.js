@@ -112,7 +112,7 @@ const projectSchema = new mongoose.Schema({
   isGarden: {
     type: Boolean,
     default: false
-  },
+  }
 })
 
 const Project = mongoose.model('Project', projectSchema)
