@@ -104,7 +104,15 @@ const projectSchema = new mongoose.Schema({
   process: [process],
   output: [output],
   cameraId: [String],
-  status: String
+  status: {
+    type: String,
+    enum: ['waiting', 'started', 'almostEnd', 'end'],
+    default: 'waiting'
+  },
+  isGarden: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const Project = mongoose.model('Project', projectSchema)

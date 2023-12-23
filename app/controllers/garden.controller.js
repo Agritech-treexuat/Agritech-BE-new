@@ -24,7 +24,8 @@ exports.initProjectGarden = async (farmId, names) => {
       const project = new Project({
         farmID,
         name,
-        status: 'waiting'
+        status: 'waiting',
+        isGarden: true
       })
       // Lưu project vào cơ sở dữ liệu
       const savedProject = await project.save()
@@ -74,7 +75,9 @@ exports.createProjectGarden = async (req, res) => {
       farmID: userId,
       name,
       input,
-      plan: plantFarming.plan
+      plan: plantFarming.plan,
+      status: 'waiting',
+      isGarden: true
     })
 
     // Lưu project vào cơ sở dữ liệu

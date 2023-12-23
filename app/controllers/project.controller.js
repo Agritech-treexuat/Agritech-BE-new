@@ -136,7 +136,9 @@ exports.initProject = async (req, res) => {
     const project = new Project({
       farmID,
       name,
-      input
+      input,
+      status: 'started',
+      isGarden: false
     })
 
     // Lưu project vào cơ sở dữ liệu
@@ -423,7 +425,9 @@ exports.getProjectsByFarmId = async (req, res) => {
         name: project.name,
         seed: project.input.seed,
         initDate: project.input.initDate,
-        image: project.input.images[0] // Lấy hình ảnh đầu tiên trong mảng images
+        image: project.input.images[0],
+        status: project.status,
+        isGarden: project.isGarden
       }
     })
 
