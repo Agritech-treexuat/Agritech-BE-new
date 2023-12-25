@@ -421,17 +421,20 @@ exports.getProjectsByFarmId = async (req, res) => {
     const projects = await Project.find({ farmID: farmId })
 
     // Chuyển đổi dữ liệu thành định dạng bạn cần
-    const projectInfo = projects.map((project) => {
-      return {
-        id: project._id,
-        name: project.name,
-        seed: project.input.seed,
-        initDate: project.input.initDate,
-        image: project.input.images[0],
-        status: project.status,
-        isGarden: project.isGarden
-      }
-    })
+    const projectInfo = await Promise.all(
+      projects.map(async (project) => {
+        const plant = await Plant.findOne({ name: project.name })
+        return {
+          id: project._id,
+          name: project.name,
+          seed: project.input.seed,
+          initDate: project.input.initDate,
+          image: plant.image,
+          status: project.status,
+          isGarden: project.isGarden
+        }
+      })
+    )
 
     res.status(200).json(projectInfo)
   } catch (error) {
