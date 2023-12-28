@@ -20,4 +20,6 @@ module.exports = function (app) {
   app.get('/farm/plant/:farmId', controller.getPlantsFarm)
 
   app.get('/plant/:plantId', controller.getPlanFromPlantId)
+
+  app.get('/plants-and-seeds', controller.getPlantAndSeed)
 }

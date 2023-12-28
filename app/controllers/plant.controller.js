@@ -13,6 +13,7 @@ const AgroChemicals = require('../models/agroChemical.model')
 const processFile = require('../middlewares/upload')
 const { format } = require('util')
 const { Storage } = require('@google-cloud/storage')
+const Seed = require('../models/seed.model')
 // Instantiate a storage client with credentials
 const storage = new Storage({ keyFilename: 'google-cloud-key.json' })
 const bucket = storage.bucket('agritech-data')
@@ -184,3 +185,33 @@ exports.getPlanFromPlantId = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 }
+
+exports.getPlantAndSeed = async (req, res) => {
+  try {
+    // Lấy danh sách các plant từ cơ sở dữ liệu
+    const plants = await Plant.find();
+
+    // Lấy danh sách các seed từ cơ sở dữ liệu
+    const seeds = await Seed.find();
+
+    // Tạo một danh sách kết quả theo định dạng yêu cầu
+    const result = plants.map((plant) => {
+      const plantData = {
+        id: plant._id,
+        name: plant.name,
+        seeds: seeds
+          .filter((seed) => seed.plantId === String(plant._id))
+          .map((seed) => ({
+            id: seed._id,
+            name: seed.name,
+          })),
+      };
+      return plantData;
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
