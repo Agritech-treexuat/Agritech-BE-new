@@ -21,12 +21,25 @@ exports.initProjectGarden = async (farmId, names) => {
 
     // Tạo một project với thông tin từ yêu cầu
     for (var name of names) {
+      // Tìm thông tin cây trồng dựa trên tên cây
+      const plant = await Plant.findOne({ name })
+
+      // Lấy plantId của cây
+      const plantId = plant ? plant._id : null
+
+      // Lấy plantFarming tương ứng với plantId và farmId
+      const plantFarming = plantId
+        ? await PlantFarming.findOne({ plantId: String(plantId), farmId: farmId, isDefault: true })
+        : null
+
       const project = new Project({
         farmID,
         name,
         status: 'waiting',
+        plan: plantFarming.plan,
         isGarden: true
       })
+
       // Lưu project vào cơ sở dữ liệu
       const savedProject = await project.save()
       projectIds.push(savedProject._id)

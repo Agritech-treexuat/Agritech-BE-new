@@ -166,3 +166,21 @@ exports.getPlanInFarmFromSeed = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 }
+
+// API endpoint để lấy thông tin kế hoạch từ seed
+exports.getPlanFromPlantId = async (req, res) => {
+  try {
+    const { plantId } = req.params
+
+    // Tìm thông tin cây trồng dựa trên seed
+    const plant = await Plant.findById(plantId)
+
+    if (!plant) {
+      return res.status(404).json({ message: 'Plant not found' })
+    }
+
+    res.status(200).json({ plant: plant })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
