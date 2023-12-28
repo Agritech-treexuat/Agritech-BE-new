@@ -21,5 +21,5 @@ module.exports = function (app) {
 
   app.get('/plant/:plantId', controller.getPlanFromPlantId)
 
-  app.get('/plants-and-seeds', controller.getPlantAndSeed)
+  app.get('/plants-and-seeds', controller.getPlantWithSeed)
 }

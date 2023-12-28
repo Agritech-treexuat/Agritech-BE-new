@@ -17,6 +17,8 @@ module.exports = function (app) {
 
   app.get('/seeds/:plantId', controller.getSeedsByPlantId)
 
+  app.get('/seedsByPlantName/:plantName', controller.getSeedsByPlantName)
+
   app.post('/admin/cultivative', [authJwt.verifyToken, authJwt.isAdmin], controller.addCultivative)
 
   app.get('/cultivative', controller.getAllCultivative)

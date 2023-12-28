@@ -177,6 +177,33 @@ exports.getSeedsByPlantId = async (req, res) => {
   }
 }
 
+// API để lấy các seed từ plant name
+exports.getSeedsByPlantName = async (req, res) => {
+  try {
+    const { plantName } = req.params
+
+    if (!plantName) {
+      return res.status(400).json({ message: 'Plant name bị thiếu' })
+    }
+    const plant = await Plant.findOne({ name: plantName })
+
+    if (!plant) {
+      return res.status(400).json({ message: 'Không có cây này' })
+    }
+
+    const seeds = await Seed.find({ plantId: String(plant._id) })
+    const result = seeds.map((seed) => ({
+      id: seed._id,
+      name: seed.name
+    }))
+
+    res.status(200).json({ result })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ' })
+  }
+}
+
 // API để thêm AgroChemicals
 exports.addCultivative = async (req, res) => {
   try {

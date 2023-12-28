@@ -186,13 +186,13 @@ exports.getPlanFromPlantId = async (req, res) => {
   }
 }
 
-exports.getPlantAndSeed = async (req, res) => {
+exports.getPlantWithSeed = async (req, res) => {
   try {
     // Lấy danh sách các plant từ cơ sở dữ liệu
-    const plants = await Plant.find();
+    const plants = await Plant.find()
 
     // Lấy danh sách các seed từ cơ sở dữ liệu
-    const seeds = await Seed.find();
+    const seeds = await Seed.find()
 
     // Tạo một danh sách kết quả theo định dạng yêu cầu
     const result = plants.map((plant) => {
@@ -203,15 +203,15 @@ exports.getPlantAndSeed = async (req, res) => {
           .filter((seed) => seed.plantId === String(plant._id))
           .map((seed) => ({
             id: seed._id,
-            name: seed.name,
-          })),
-      };
-      return plantData;
-    });
+            name: seed.name
+          }))
+      }
+      return plantData
+    })
 
-    res.status(200).json(result);
+    res.status(200).json({ result })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error(error)
+    res.status(500).json({ message: 'Internal Server Error' })
   }
-};
+}
