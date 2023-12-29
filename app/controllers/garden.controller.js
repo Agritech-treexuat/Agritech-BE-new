@@ -545,3 +545,36 @@ exports.updateStatusDelivery = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
+
+exports.getPlantCurrentGarden = async (req, res) => {
+  try {
+    const { gardenId } = req.params;
+
+    // Kiểm tra xem garden có tồn tại không
+    const garden = await Garden.findById(gardenId);
+    if (!garden) {
+      return res.status(404).json({ message: 'Garden not found' });
+    }
+
+    // Lọc các project có status là "started" hoặc "almostEnd"
+    const filteredProjects = await Promise.all(garden.projectId.filter(async (projectId) => {
+      const project = await Project.findById(projectId);
+      return project && (project.status === 'started' || project.status === 'almostEnd');
+    }));
+
+    // Lấy danh sách cây từ các project
+    const plants = await Promise.all(filteredProjects.map(async (projectId) => {
+      const project = await Project.findById(projectId);
+      const plant = await Plant.findOne({ name: project.name })
+      return {
+        id: plant._id,
+        name: plant.name,
+      };
+    }));
+
+    res.json({plants});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}

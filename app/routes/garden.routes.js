@@ -23,6 +23,8 @@ module.exports = function (app) {
 
   app.get('/delivery/:gardenId', controller.getDelivery)
 
+  app.get('/plantCurrentInGarden/:gardenId', controller.getPlantCurrentGarden)
+
   app.post(
     '/updateDeliveryStatus/:gardenId/:deliveryId',
     [authJwt.verifyToken, authJwt.isFarm],
