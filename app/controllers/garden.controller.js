@@ -494,7 +494,7 @@ exports.addDelivery = async (req, res) => {
     await existingFarm.save()
 
     // Trả về thông tin của delivery mới
-    res.status(201).json({ newDelivery })
+    res.status(201).json({ newDelivery, allDeliveries: existingFarm.deliveries })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Internal Server Error' })
@@ -539,7 +539,7 @@ exports.updateStatusDelivery = async (req, res) => {
     await existingFarm.save()
 
     // Trả về thông tin của delivery đã được cập nhật
-    res.status(200).json({ updatedDelivery: existingDelivery })
+    res.status(200).json({ updatedDelivery: existingDelivery, allDeliveries: existingFarm.deliveries })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Internal Server Error' })
